@@ -33,7 +33,7 @@ void Eff_RandomEffects()
 
 void Eff_ColorWhipe()
 {
-  	RGBlib_ColorWipe(COLOR_RED, 120, true);
+  RGBlib_ColorWipe(COLOR_RED, 120, true);
 	RGBlib_ColorWipe(COLOR_BLUE, 120, false);
 	RGBlib_ColorWipe(COLOR_GREEN, 120, false);
 	RGBlib_ColorWipe(COLOR_BLACK, 120, false);
@@ -99,7 +99,7 @@ void Eff_SpeedRotateLed()
       RGBlib_Scanner(COLOR_BLUE, 10, false);
     }
 
-    for (uint8_t i = 10; i < 90; i += 10)  // zrychlujici scanner
+    for (uint8_t i = 10; i < 90; i += 10)  // zpomalujici scanner
     {
         RGBlib_Scanner(COLOR_BLUE, i, false);
     }

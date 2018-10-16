@@ -6,7 +6,6 @@
  */
 
 #include "RGBlibrary.h"
-//#include "stm32f0xx_adc.h"
 #include "WS2812driver.h"
 
 #define LEDS 60
@@ -25,18 +24,10 @@ typedef enum
 }rainbow_colors_e;
 
 RGB_colors_e colors[] = { COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_WHITE_DARK, COLOR_VIOLET };
-
-uint8_t RGBbuff[BUFF_SIZE];
-static volatile uint32_t nDelayTimer;
+uint8_t g_arrRGBbuff[BUFF_SIZE];
 
 void RGBlib_Init()
 {
-	if (SysTick_Config(SystemCoreClock / 1000))
-	{
-	     /* Capture error */
-	     while (1);
-	}
-
 	WS2812_Init();
 	RGBlib_Clear();
 }
@@ -53,7 +44,7 @@ void RGBlib_ColorWipe(RGB_colors_e color, uint16_t wait_ms, bool bClear)
   {
 	  RGBlib_SetColor(i, color);
 	  RGBlib_Show();
-	  RGBlib_Delay_ms(wait_ms);
+	  WS2812_Delay_ms(wait_ms);
   }
 }
 
@@ -69,7 +60,7 @@ void RGBlib_ColorWipeCenter(RGB_colors_e color, uint16_t wait_ms)
 		RGBlib_SetColor(mid + i, color);
 		RGBlib_SetColor(mid - i, color);
 		RGBlib_Show();
-		RGBlib_Delay_ms(wait_ms);
+		WS2812_Delay_ms(wait_ms);
 	}
 
 	RGBlib_SetColor(mid, COLOR_BLACK);
@@ -78,7 +69,7 @@ void RGBlib_ColorWipeCenter(RGB_colors_e color, uint16_t wait_ms)
 		RGBlib_SetColor(mid + i, COLOR_BLACK);
 		RGBlib_SetColor(mid - i, COLOR_BLACK);
 		RGBlib_Show();
-		RGBlib_Delay_ms(wait_ms);
+		WS2812_Delay_ms(wait_ms);
 	}
 }
 
@@ -90,7 +81,7 @@ void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn)
 	  RGBlib_SetColorAll(COLOR_BLACK, 0);
 	  RGBlib_SetColor(i, color);
 	  RGBlib_Show();
-	  RGBlib_Delay_ms(wait_ms);
+	  WS2812_Delay_ms(wait_ms);
   }
 
   if (bReturn)
@@ -100,7 +91,7 @@ void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn)
       RGBlib_SetColorAll(COLOR_BLACK, 0);
       RGBlib_SetColor(i - 1, color);
       RGBlib_Show();
-      RGBlib_Delay_ms(wait_ms);
+      WS2812_Delay_ms(wait_ms);
     }
   }
 
@@ -121,7 +112,7 @@ void RGBlib_TheaterChase(RGB_colors_e color, uint8_t cycles, uint8_t space, uint
 			}
 
 			RGBlib_Show();
-			RGBlib_Delay_ms(wait_ms);
+			WS2812_Delay_ms(wait_ms);
 
 			for (uint8_t i = 0; i < LEDS; i += space)
 			{
@@ -143,7 +134,7 @@ void RGBlib_TheaterChaseTwoColor(RGB_colors_e color1, RGB_colors_e color2, uint8
         }
 
         RGBlib_Show();
-        RGBlib_Delay_ms(wait_ms);
+        WS2812_Delay_ms(wait_ms);
 
         for (uint8_t i = 0; i < LEDS; i += 2)
         {
@@ -152,7 +143,7 @@ void RGBlib_TheaterChaseTwoColor(RGB_colors_e color1, RGB_colors_e color2, uint8
         }
 
         RGBlib_Show();
-        RGBlib_Delay_ms(wait_ms);
+        WS2812_Delay_ms(wait_ms);
 
 	}
 }
@@ -171,7 +162,7 @@ void RGBlib_TheaterChaseTwoColorRotate(RGB_colors_e color1, RGB_colors_e color2,
           }
 
           RGBlib_Show();
-          RGBlib_Delay_ms(wait_ms);
+          WS2812_Delay_ms(wait_ms);
           RGBlib_Clear();
         }
     }
@@ -188,7 +179,7 @@ void RGBlib_Rainbow(uint8_t cycles, uint16_t wait_ms)
     }
 
     RGBlib_Show();
-    RGBlib_Delay_ms(wait_ms);
+    WS2812_Delay_ms(wait_ms);
   }
 }
 
@@ -203,7 +194,7 @@ void RGBlib_RainbowCycle(uint8_t cycles, uint16_t wait_ms)
 		}
 
 		RGBlib_Show();
-		RGBlib_Delay_ms(wait_ms);
+		WS2812_Delay_ms(wait_ms);
 	}
 
 	RGBlib_Clear();
@@ -263,20 +254,20 @@ void RGBlib_Detonate(RGB_colors_e color, uint16_t nStartDelay_ms)
 	while (nStartDelay_ms)
 	{
 		RGBlib_SetColorAll(color, 0);		// Flash the color
-		RGBlib_Delay_ms(6);
+		WS2812_Delay_ms(6);
 		RGBlib_Clear();
-		RGBlib_Delay_ms(nStartDelay_ms);
+		WS2812_Delay_ms(nStartDelay_ms);
 		nStartDelay_ms = (nStartDelay_ms * 10) / 11;    // delay between flashes is halved each time until zero
 	}
 
   RGBlib_SetColorAll(color, 0);
-  RGBlib_Delay_ms(1000);
+  WS2812_Delay_ms(1000);
 
 	// Then we fade to black....
 	for (uint16_t nBrightness = RGBlib_GetBrightnessMax(); nBrightness > 0; nBrightness--)
 	{
 		RGBlib_SetBrightness(nBrightness);
-		RGBlib_Delay_ms(100);
+		WS2812_Delay_ms(100);
 	}
 
   RGBlib_SetColorAll(COLOR_BLACK, 500);
@@ -290,15 +281,15 @@ void RGBlib_Fade(RGB_colors_e color)
   for (uint8_t nBrightness = 0; nBrightness <= RGBlib_GetBrightnessMax(); nBrightness++)
 	{
 		RGBlib_SetBrightness(nBrightness);
-		RGBlib_Delay_ms(100);
+		WS2812_Delay_ms(100);
 	}
 
-	RGBlib_Delay_ms(500);
+  WS2812_Delay_ms(500);
 
 	for (uint8_t nBrightness = RGBlib_GetBrightnessMax() - 1; nBrightness > 0; nBrightness--)
 	{
 		RGBlib_SetBrightness(nBrightness + 1);
-		RGBlib_Delay_ms(100);
+		WS2812_Delay_ms(100);
 	}
 
   RGBlib_SetColorAll(COLOR_BLACK, 0);
@@ -310,9 +301,9 @@ void RGBlib_SetColor(uint8_t position, RGB_colors_e color)
 {
   if (position < LEDS)
   {
-	  RGBbuff[position * 3] = (uint8_t)(color >> 16);
-	  RGBbuff[position * 3 + 1] = (uint8_t)(color >> 8);
-	  RGBbuff[position * 3 + 2] = (uint8_t)color;
+	  g_arrRGBbuff[position * 3] = (uint8_t)(color >> 16);
+	  g_arrRGBbuff[position * 3 + 1] = (uint8_t)(color >> 8);
+	  g_arrRGBbuff[position * 3 + 2] = (uint8_t)color;
   }
 }
 
@@ -320,7 +311,7 @@ uint32_t RGBlib_GetColor(uint8_t position)
 {
   if (position < LEDS)
   {
-	  return (RGBbuff[position++] << 16) + (RGBbuff[position++] << 8) + RGBbuff[position];
+	  return (g_arrRGBbuff[position] << 16) + (g_arrRGBbuff[position + 1] << 8) + g_arrRGBbuff[position + 2];
   }
 
   return 0;
@@ -334,7 +325,7 @@ void RGBlib_SetColorAll(RGB_colors_e color, uint16_t wait_ms)
 		RGBlib_Show();
 	}
 
-	RGBlib_Delay_ms(wait_ms);
+	WS2812_Delay_ms(wait_ms);
 }
 
 void RGBlib_Clear()
@@ -355,7 +346,7 @@ uint32_t RGBlib_GetColorFromRGB(uint8_t r, uint8_t g, uint8_t b)
 
 void RGBlib_Show()
 {
-	WS2812_Send(RGBbuff, sizeof(RGBbuff));
+	WS2812_Send(g_arrRGBbuff, sizeof(g_arrRGBbuff));
 }
 
 void RGBlib_SetBrightness(uint8_t nBrightness)
@@ -374,20 +365,6 @@ uint8_t RGBlib_GetBrightnessMax()
 	return WS2812_GetBrightnessMax();
 }
 
-void SysTick_Handler(void)
-{
-  if (nDelayTimer)
-  {
-    nDelayTimer--;
-  }
-}
-
-void RGBlib_Delay_ms(uint32_t delay_ms)
-{
-	nDelayTimer = delay_ms;
-	while (nDelayTimer);
-}
-
 uint16_t RGBlib_GetLedsCount()
 {
 	return LEDS;
@@ -404,6 +381,11 @@ RGB_colors_e RGBlib_GetRandomColor()
 {
 	uint8_t c = RGBlib_Rand(1, sizeof(colors));
 	return colors[--c];
+}
+
+void RGBlib_Delay_ms(uint32_t delay_ms)
+{
+  WS2812_Delay_ms(delay_ms);
 }
 
 uint32_t RGBlib_GetRandomNumber()
