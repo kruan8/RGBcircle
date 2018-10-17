@@ -24,19 +24,20 @@
 
 #define WS_TIM   TIM3                     // timer pro rizeni impulsu
 
-#define LED_PER_HALF 1
+#define LED_PER_HALF 1                    // pocet led ma polovinu DMA bufferu (tzn. zpracovavaji se 2 LED)
 
 #define TIMER_CAPTURE_L		17			                // hodnota capture registru pro impuls L
 #define TIMER_CAPTURE_H    	34			              // hodnota capture registru pro impuls H
 
-#define BRIGHTNESS_MAX  31
+#define BRIGHTNESS_MAX  31                        // pocet urovni jasu
 
 static uint8_t g_nBrightness = BRIGHTNESS_MAX;		// nastaveni jasu, aplikuje se pri plneni bufferu
 static int g_nCurrentLed = 0;
 static int g_nTotalLed = 0;
-static uint8_t *arrLedBuffer = 0;		              // pointer na buffer s RGB hodnotami LED
-static uint8_t g_bDMAInProcess = 0;	                // flag prenosu DMA
-static volatile uint32_t g_nDelayTimer;
+static uint8_t *g_pLedBuffer = 0;		              // pointer na buffer s RGB hodnotami LED
+static uint8_t g_bDMAInProcess = 0;	              // flag prenosu DMA
+
+static volatile uint32_t g_nDelayTimer;           // citac 1ms
 
 static union
 {
@@ -46,7 +47,7 @@ static union
         uint8_t begin[LED_PER_HALF * 24];
         uint8_t end[LED_PER_HALF * 24];
     } __attribute__((packed));
-} led_dma_t;
+} g_LedDMA;
 
 // prevod pro 8 bitove nastaveni jasu
 //static const uint8_t GammaBrightness8[] =
@@ -77,6 +78,9 @@ static const uint8_t GammaBrightness5[] =
 	51, 58, 67, 76, 86, 96, 108, 120,
 	134, 148, 163, 180, 197, 216, 235, 255
 };
+
+static void WS2812_FillDMABuffer(uint8_t* pBuffer);
+
 
 void WS2812_Init()
 {
@@ -138,9 +142,9 @@ void WS2812_Init()
   DMA_DeInit(DMA1_Channel4);
 
   DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&WS_TIM->CCR1; //TIM3_CCR1_Address;	// physical address of Timer 3 CCR1
-  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)led_dma_t.dma_buffer;		// this is the buffer memory
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)g_LedDMA.dma_buffer;		// this is the buffer memory
   DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;						// data shifted from memory to peripheral
-  DMA_InitStructure.DMA_BufferSize = sizeof(led_dma_t.dma_buffer);
+  DMA_InitStructure.DMA_BufferSize = sizeof(g_LedDMA.dma_buffer);
   DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
   DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;					// automatically increase buffer index
   DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
@@ -167,34 +171,30 @@ void WS2812_Init()
 //	DMA_Cmd(DMA1_Channel4, ENABLE);
 //    TIM_Cmd(TIM3, ENABLE);
     // ---------------------------------
+	WS2812_AdInit();
 }
 
-void WS2812_Fill(uint8_t *buffer, uint8_t *color)
+void WS2812_AdInit(void)
 {
-	uint32_t i;
+  ADC_InitTypeDef ADC_InitStructure;
 
-  uint8_t r = (color[0] * GammaBrightness5[g_nBrightness]) >> 8;
-  uint8_t g = (color[1] * GammaBrightness5[g_nBrightness]) >> 8;
-  uint8_t b = (color[2] * GammaBrightness5[g_nBrightness]) >> 8;
+  // Initialize ADC 14MHz RC
+  RCC_ADCCLKConfig(RCC_ADCCLK_HSI14);
+  RCC_HSI14Cmd(ENABLE);
+  while (!RCC_GetFlagStatus(RCC_FLAG_HSI14RDY));
 
-//	color[0] = (color[0] * GammaBrightness5[g_nBrightness]) >> 8;
-//	color[1] = (color[1] * GammaBrightness5[g_nBrightness]) >> 8;
-//	color[2] = (color[2] * GammaBrightness5[g_nBrightness]) >> 8;
+  ADC_DeInit(ADC1);
+  ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
+  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+  ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
+  ADC_InitStructure.ADC_ScanDirection = ADC_ScanDirection_Backward;
+  ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
+  ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_TRGO; //default
+  ADC_Init(ADC1, &ADC_InitStructure);
 
-  for(i = 0; i < 8; i++) // GREEN data
- 	{
-    buffer[i] = ((g << i) & 0x80) ? TIMER_CAPTURE_H : TIMER_CAPTURE_L;
- 	}
-
- 	for(i = 0; i < 8; i++) // RED
- 	{
- 		buffer[8 + i] = ((r << i) & 0x80) ? TIMER_CAPTURE_H : TIMER_CAPTURE_L;
- 	}
-
- 	for(i = 0; i < 8; i++) // BLUE
- 	{
- 		buffer[16 + i] = ((b << i) & 0x80) ? TIMER_CAPTURE_H : TIMER_CAPTURE_L;
- 	}
+  //Convert the ADC1 temperature sensor, user shortest sample time to generate most noise
+  ADC1->CHSELR |= (uint32_t)ADC_Channel_TempSensor;
+  ADC1->SMPR = 0;     // ADC_SampleTime_1_5Cycles
 }
 
 void WS2812_SetBrightness(uint8_t nBrightness)
@@ -217,9 +217,34 @@ uint8_t WS2812_GetBrightnessMax()
 	return BRIGHTNESS_MAX;
 }
 
-void WS2812_Send(uint8_t *buffer, uint8_t len)
+void WS2812_Fill(uint8_t *buffer, uint8_t *color)
 {
   uint32_t i;
+
+  uint8_t r = (color[0] * GammaBrightness5[g_nBrightness]) >> 8;
+  uint8_t g = (color[1] * GammaBrightness5[g_nBrightness]) >> 8;
+  uint8_t b = (color[2] * GammaBrightness5[g_nBrightness]) >> 8;
+
+  // nasazet bity do DMA pameti v poradi GRB
+  // Todo: prepsat do jednoho for cyklu, posouvat rgb promenne
+  for (i = 0; i < 8; i++) // GREEN
+  {
+    buffer[i] = ((g << i) & 0x80) ? TIMER_CAPTURE_H : TIMER_CAPTURE_L;
+  }
+
+  for (i = 0; i < 8; i++) // RED
+  {
+    buffer[8 + i] = ((r << i) & 0x80) ? TIMER_CAPTURE_H : TIMER_CAPTURE_L;
+  }
+
+  for (i = 0; i < 8; i++) // BLUE
+  {
+    buffer[16 + i] = ((b << i) & 0x80) ? TIMER_CAPTURE_H : TIMER_CAPTURE_L;
+  }
+}
+
+void WS2812_Send(uint8_t *buffer, uint8_t len)
+{
   if (len < 1)
   {
     return;
@@ -227,34 +252,13 @@ void WS2812_Send(uint8_t *buffer, uint8_t len)
 
   g_nCurrentLed = 0;
   g_nTotalLed = len / 3;
-  arrLedBuffer = buffer;
+  g_pLedBuffer = buffer;
 
-  for (i = 0; (i < LED_PER_HALF) && (g_nCurrentLed < g_nTotalLed + 2); i++, g_nCurrentLed++)
-  {
-    if (g_nCurrentLed < g_nTotalLed)
-    {
-      WS2812_Fill(led_dma_t.begin + (24 * i), &arrLedBuffer[g_nCurrentLed * 3]);
-    }
-    else
-    {
-      memset(led_dma_t.begin + (24 * i), 0, 24);
-    }
-  }
-
-  for (i = 0; (i < LED_PER_HALF) && (g_nCurrentLed < g_nTotalLed + 2); i++, g_nCurrentLed++)
-  {
-    if (g_nCurrentLed < g_nTotalLed)
-    {
-      WS2812_Fill(led_dma_t.end + (24 * i), &arrLedBuffer[g_nCurrentLed * 3]);
-    }
-    else
-    {
-      memset(led_dma_t.end + (24 * i), 0, 24);
-    }
-  }
+  WS2812_FillDMABuffer(g_LedDMA.begin);
+  WS2812_FillDMABuffer(g_LedDMA.end);
 
   g_bDMAInProcess = 1;
-  DMA1_Channel4->CNDTR = sizeof(led_dma_t.dma_buffer);  // load number of bytes to be transferred
+  DMA1_Channel4->CNDTR = sizeof(g_LedDMA.dma_buffer);  // load number of bytes to be transferred
   DMA_Cmd(DMA1_Channel4, ENABLE);           // enable DMA channel 4
   TIM_Cmd(WS_TIM, ENABLE);                          // Go!!!
 
@@ -262,10 +266,24 @@ void WS2812_Send(uint8_t *buffer, uint8_t len)
   while (g_bDMAInProcess);
 }
 
+void WS2812_FillDMABuffer(uint8_t* pBuffer)
+{
+  for (uint32_t i = 0; (i < LED_PER_HALF) && (g_nCurrentLed < g_nTotalLed + 2); i++, g_nCurrentLed++)
+  {
+    if (g_nCurrentLed < g_nTotalLed)
+    {
+      WS2812_Fill(pBuffer + (24 * i), &g_pLedBuffer[g_nCurrentLed * 3]);
+    }
+    else
+    {
+      memset(pBuffer + (24 * i), 0, 24);
+    }
+  }
+}
+
 void DMA1_Channel4_5_IRQHandler(void)
 {
-	uint8_t * buffer;
-	int i;
+	uint8_t * pBuffer;
 
 	if (g_nTotalLed == 0)
 	{
@@ -276,27 +294,16 @@ void DMA1_Channel4_5_IRQHandler(void)
 	if (DMA_GetITStatus(DMA1_IT_HT4))
 	{
 	    DMA_ClearITPendingBit(DMA1_IT_HT4);
-	    buffer = led_dma_t.begin;
+	    pBuffer = g_LedDMA.begin;
 	}
 
 	if (DMA_GetITStatus(DMA1_IT_TC4))
 	{
 	    DMA_ClearITPendingBit(DMA1_IT_TC4);
-	    buffer = led_dma_t.end;
+	    pBuffer = g_LedDMA.end;
 	}
 
-
-	for (i = 0; (i < LED_PER_HALF) && (g_nCurrentLed < g_nTotalLed + 2); i++, g_nCurrentLed++)
-	{
-		if (g_nCurrentLed < g_nTotalLed)
-		{
-			WS2812_Fill(buffer + (24 * i), &arrLedBuffer[g_nCurrentLed * 3]);
-		}
-		else
-		{
-			memset(buffer + (24 * i), 0, 24);
-		}
-	}
+	WS2812_FillDMABuffer(pBuffer);
 
 	if (g_nCurrentLed >= g_nTotalLed + 2)
 	{
@@ -321,4 +328,48 @@ void WS2812_Delay_ms(uint32_t delay_ms)
 {
   g_nDelayTimer = delay_ms;
   while (g_nDelayTimer);
+}
+
+uint32_t WS2812_GetRandomNumber()
+{
+  //enable ADC1 clock
+  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
+
+  //enable internal temperature sensor
+  ADC->CCR |= (uint32_t)ADC_CCR_TSEN;
+
+  // Enable ADCperipheral
+  ADC1->CR |= (uint32_t)ADC_CR_ADEN;
+  while (!(ADC1->ISR & ADC_FLAG_ADRDY));
+
+  // Enable CRC clock
+  RCC->AHBENR |= RCC_AHBENR_CRCEN;
+
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    //Start ADC1 Software Conversion
+    ADC1->CR |= (uint32_t)ADC_CR_ADSTART;
+
+    //wait for conversion complete
+    while (!(ADC1->ISR = (uint32_t)ADC_FLAG_EOC));
+
+    CRC->DR = ADC1->DR;
+
+    //clear EOC flag
+//    ADC1->ISR = (uint32_t)ADC_FLAG_EOC;
+  }
+
+  CRC->DR = 0xBADA55E5;
+  uint32_t nValue = CRC->DR;
+
+  // disable temperature sensor to save power
+  ADC->CCR &= (uint32_t)(~ADC_CCR_TSEN);
+
+  // ADC disable
+  ADC1->CR |= (uint32_t)ADC_CR_ADDIS;
+
+  RCC->APB2ENR &= ~RCC_APB2Periph_ADC1;
+  RCC->AHBENR &= ~RCC_AHBENR_CRCEN;
+
+  return nValue;
 }

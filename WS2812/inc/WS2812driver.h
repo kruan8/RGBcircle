@@ -18,11 +18,13 @@
 
 
 void WS2812_Init();
+void WS2812_AdInit(void);
 void WS2812_Send(uint8_t *buffer, uint8_t len);
 void WS2812_Fill(uint8_t *buffer, uint8_t *color);
 void WS2812_SetBrightness(uint8_t nBrightness);
 uint8_t WS2812_GetBrightness();
 uint8_t WS2812_GetBrightnessMax();
 void WS2812_Delay_ms(uint32_t delay_ms);
+uint32_t WS2812_GetRandomNumber();
 
 #endif /* WS2812DRIVER_H_VER_H_ */
