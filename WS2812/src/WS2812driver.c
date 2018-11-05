@@ -31,14 +31,6 @@
 
 #define BRIGHTNESS_MAX  31                        // pocet urovni jasu
 
-static uint8_t g_nBrightness = BRIGHTNESS_MAX;		// nastaveni jasu, aplikuje se pri plneni bufferu
-static int g_nCurrentLed = 0;
-static int g_nTotalLed = 0;
-static uint8_t *g_pLedBuffer = 0;		              // pointer na buffer s RGB hodnotami LED
-static uint8_t g_bDMAInProcess = 0;	              // flag prenosu DMA
-
-static volatile uint32_t g_nDelayTimer;           // citac 1ms
-
 static union
 {
     uint8_t dma_buffer[2 * LED_PER_HALF * 24];
@@ -48,6 +40,15 @@ static union
         uint8_t end[LED_PER_HALF * 24];
     } __attribute__((packed));
 } g_LedDMA;
+
+static uint8_t g_nBrightness = BRIGHTNESS_MAX;		// nastaveni jasu, aplikuje se pri plneni bufferu
+static int g_nCurrentLed = 0;
+static int g_nTotalLed = 0;
+static uint8_t *g_pLedBuffer = 0;		              // pointer na buffer s RGB hodnotami LED
+static uint8_t g_bDMAInProcess = 0;	              // flag prenosu DMA
+
+static volatile uint32_t g_nDelayTimer;           // timer 1ms
+static volatile uint32_t g_nTicks = 0;                // citac tiku 1ms
 
 // prevod pro 8 bitove nastaveni jasu
 //static const uint8_t GammaBrightness8[] =
@@ -217,6 +218,11 @@ uint8_t WS2812_GetBrightnessMax()
 	return BRIGHTNESS_MAX;
 }
 
+uint8_t WS2812_GetBrightnessValue(uint8_t nBrightness)
+{
+  return GammaBrightness5[g_nBrightness];
+}
+
 void WS2812_Fill(uint8_t *buffer, uint8_t *color)
 {
   uint32_t i;
@@ -313,11 +319,11 @@ void DMA1_Channel4_5_IRQHandler(void)
 		g_nTotalLed = 0;
 		g_bDMAInProcess = 0;
 	}
-
 }
 
 void SysTick_Handler(void)
 {
+  g_nTicks++;
   if (g_nDelayTimer)
   {
     g_nDelayTimer--;
@@ -328,6 +334,11 @@ void WS2812_Delay_ms(uint32_t delay_ms)
 {
   g_nDelayTimer = delay_ms;
   while (g_nDelayTimer);
+}
+
+uint32_t WS2812_GetTicks(void)
+{
+  return g_nTicks;
 }
 
 uint32_t WS2812_GetRandomNumber()

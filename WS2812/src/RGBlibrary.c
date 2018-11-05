@@ -11,19 +11,8 @@
 #define LEDS 60
 #define BUFF_SIZE (LEDS * 3)
 
-typedef enum
-{
-	rainbow_white  = 0x969696,	//    colors[0].r=150; colors[0].g=150; colors[0].b=150;
-	rainbow_red    = 0xFF0000,	//    colors[1].r=255; colors[1].g=000; colors[1].b=000;//red
-	rainbow_orange = 0xFF6400,	//    colors[2].r=255; colors[2].g=100; colors[2].b=000;//orange
-	rainbow_yellow = 0x64FF00,	//    colors[3].r=100; colors[3].g=255; colors[3].b=000;//yellow
-	rainbow_green  = 0x00ff00,	//    colors[4].r=000; colors[4].g=255; colors[4].b=000;//green
-	rainbow_tyrkis = 0x0064FF,	//    colors[5].r=000; colors[5].g=100; colors[5].b=255;//light blue (türkis)
-	rainbow_blue   = 0x0000FF,	//    colors[6].r=000; colors[6].g=000; colors[6].b=255;//blue
-	rainbow_violet = 0x6400FF,	//    colors[7].r=100; colors[7].g=000; colors[7].b=255;//violet
-}rainbow_colors_e;
+RGB_colors_e colors[] = { c_red, c_green, c_blue, c_white_dark, c_violet };  // pouzita paleta barev
 
-RGB_colors_e colors[] = { COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_WHITE_DARK, COLOR_VIOLET };
 uint8_t g_arrRGBbuff[BUFF_SIZE];
 
 void RGBlib_Init()
@@ -32,17 +21,17 @@ void RGBlib_Init()
 	RGBlib_Clear();
 }
 
-// postupne rozsvecovani LED
+// postupne rozsveceni vsech LED (stirani)
 void RGBlib_ColorWipe(RGB_colors_e color, uint16_t wait_ms, bool bClear)
 {
   if (bClear)
   {
-      RGBlib_SetColorAll(COLOR_BLACK, 0);
+      RGBlib_Clear();
   }
 
   for (uint16_t i = 0; i < LEDS; i++)
   {
-	  RGBlib_SetColor(i, color);
+	  RGBlib_SetLED(i, color);
 	  RGBlib_Show();
 	  WS2812_Delay_ms(wait_ms);
   }
@@ -54,23 +43,25 @@ void RGBlib_ColorWipeCenter(RGB_colors_e color, uint16_t wait_ms)
   RGBlib_Clear();
 
 	uint8_t mid = LEDS / 2;
-	RGBlib_SetColor(mid, color);
+	RGBlib_SetLED(mid, color);
 	for (uint16_t i = 0; i <= LEDS / 2; i++)
 	{
-		RGBlib_SetColor(mid + i, color);
-		RGBlib_SetColor(mid - i, color);
+		RGBlib_SetLED(mid + i, color);
+		RGBlib_SetLED(mid - i, color);
 		RGBlib_Show();
 		WS2812_Delay_ms(wait_ms);
 	}
 
-	RGBlib_SetColor(mid, COLOR_BLACK);
+	RGBlib_SetLED(mid, c_black);
 	for (uint16_t i = 0; i <= LEDS / 2; i++)
 	{
-		RGBlib_SetColor(mid + i, COLOR_BLACK);
-		RGBlib_SetColor(mid - i, COLOR_BLACK);
+		RGBlib_SetLED(mid + i, c_black);
+		RGBlib_SetLED(mid - i, c_black);
 		RGBlib_Show();
 		WS2812_Delay_ms(wait_ms);
 	}
+
+	WS2812_Delay_ms(1000);
 }
 
 void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn)
@@ -78,8 +69,8 @@ void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn)
   RGBlib_Clear();
   for(uint16_t i = 0; i < LEDS; i++)
   {
-	  RGBlib_SetColorAll(COLOR_BLACK, 0);
-	  RGBlib_SetColor(i, color);
+	  RGBlib_SetColorAll(c_black, 0);
+	  RGBlib_SetLED(i, color);
 	  RGBlib_Show();
 	  WS2812_Delay_ms(wait_ms);
   }
@@ -88,141 +79,16 @@ void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn)
   {
     for(int16_t i = LEDS; i > 0; i--)
     {
-      RGBlib_SetColorAll(COLOR_BLACK, 0);
-      RGBlib_SetColor(i - 1, color);
+      RGBlib_SetColorAll(c_black, 0);
+      RGBlib_SetLED(i - 1, color);
       RGBlib_Show();
       WS2812_Delay_ms(wait_ms);
     }
   }
 
-  RGBlib_SetColorAll(COLOR_BLACK, 0);
+  RGBlib_SetColorAll(c_black, 0);
 }
 
-//Theatre-style crawling lights.
-void RGBlib_TheaterChase(RGB_colors_e color, uint8_t cycles, uint8_t space, uint16_t wait_ms)
-{
-  RGBlib_Clear();
-	while (cycles--)
-	{
-		for (uint8_t q = 0; q < space; q++)
-		{
-			for (uint8_t i = 0; i < LEDS; i += space)
-			{
-				RGBlib_SetColor(i + q, color);    //turn every third pixel on
-			}
-
-			RGBlib_Show();
-			WS2812_Delay_ms(wait_ms);
-
-			for (uint8_t i = 0; i < LEDS; i += space)
-			{
-				RGBlib_SetColor(i + q, COLOR_BLACK);        //turn every third pixel off
-			}
-		}
-	}
-}
-
-void RGBlib_TheaterChaseTwoColor(RGB_colors_e color1, RGB_colors_e color2, uint8_t cycles, uint16_t wait_ms)
-{
-  RGBlib_Clear();
-	while (cycles--)
-	{
-        for (uint8_t i = 0; i < LEDS; i += 2)
-        {
-            RGBlib_SetColor(i, color1);
-            RGBlib_SetColor(i + 1, color2);
-        }
-
-        RGBlib_Show();
-        WS2812_Delay_ms(wait_ms);
-
-        for (uint8_t i = 0; i < LEDS; i += 2)
-        {
-            RGBlib_SetColor(i, color2);
-            RGBlib_SetColor(i + 1, color1);
-        }
-
-        RGBlib_Show();
-        WS2812_Delay_ms(wait_ms);
-
-	}
-}
-
-void RGBlib_TheaterChaseTwoColorRotate(RGB_colors_e color1, RGB_colors_e color2, uint8_t cycles, uint16_t wait_ms)
-{
-    RGBlib_Clear();
-    while (cycles--)
-    {
-        for (uint8_t space = 0; space < LEDS / 2; space++)
-        {
-          for (uint8_t i = 0; i < LEDS; i += (LEDS / 2))
-          {
-              RGBlib_SetColor(i + space, color1);
-              RGBlib_SetColor(i + 3 - space, color2);
-          }
-
-          RGBlib_Show();
-          WS2812_Delay_ms(wait_ms);
-          RGBlib_Clear();
-        }
-    }
-}
-
-void RGBlib_Rainbow(uint8_t cycles, uint16_t wait_ms)
-{
-  RGBlib_Clear();
-  for (uint16_t j = 0; j < 256 * cycles; j++)
-  {
-    for (uint16_t i = 0; i < LEDS; i++)
-    {
-    	RGBlib_SetColor(i, RGBlib_Wheel((i + j) & 255));
-    }
-
-    RGBlib_Show();
-    WS2812_Delay_ms(wait_ms);
-  }
-}
-
-void RGBlib_RainbowCycle(uint8_t cycles, uint16_t wait_ms)
-{
-  RGBlib_Clear();
-	for (uint16_t j = 0; j < 256 * cycles; j++)
-	{
-		for (uint16_t i = 0; i < LEDS; i++)
-		{
-			RGBlib_SetColor(i, RGBlib_Wheel(((i * 256 / LEDS) + j) & 255));
-		}
-
-		RGBlib_Show();
-		WS2812_Delay_ms(wait_ms);
-	}
-
-	RGBlib_Clear();
-}
-
-// //Theatre-style crawling lights with rainbow effect
-void RGBlib_TheaterChaseRainbow(uint16_t wait_ms)
-{
-
-	for (uint8_t j = 0; j < 256; j++)	// cycle all 256 colors in the wheel
-	{
-		for (uint8_t q = 0; q < 3; q++)
-		{
-			for (uint8_t i = 0; i < LEDS; i = i + 3)
-			{
-				RGBlib_SetColor(i + q, RGBlib_Wheel((i + j) % 255));    //turn every third pixel on
-			}
-
-			RGBlib_Show();
-			RGBlib_Delay_ms(wait_ms);
-
-			for (uint8_t i = 0; i < LEDS; i = i + 3)
-			{
-				RGBlib_SetColor(i + q, 0);        //turn every third pixel off
-			}
-		}
-	}
-}
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
@@ -244,66 +110,28 @@ uint32_t RGBlib_Wheel(uint8_t nWheelPos)
 	}
 }
 
-// ---------------------------------------------------------------------------------------
-// --------------------- DETONATE --------------------------------------------------
-// I added this one just to demonstrate how quickly you can flash the string.
-// Flashes get faster and faster until *boom* and fade to black.
-
-void RGBlib_Detonate(RGB_colors_e color, uint16_t nStartDelay_ms)
-{
-	while (nStartDelay_ms)
-	{
-		RGBlib_SetColorAll(color, 0);		// Flash the color
-		WS2812_Delay_ms(6);
-		RGBlib_Clear();
-		WS2812_Delay_ms(nStartDelay_ms);
-		nStartDelay_ms = (nStartDelay_ms * 10) / 11;    // delay between flashes is halved each time until zero
-	}
-
-  RGBlib_SetColorAll(color, 0);
-  WS2812_Delay_ms(1000);
-
-	// Then we fade to black....
-	for (uint16_t nBrightness = RGBlib_GetBrightnessMax(); nBrightness > 0; nBrightness--)
-	{
-		RGBlib_SetBrightness(nBrightness);
-		WS2812_Delay_ms(100);
-	}
-
-  RGBlib_SetColorAll(COLOR_BLACK, 500);
-  RGBlib_SetBrightness(RGBlib_GetBrightnessMax());
-}
-
-void RGBlib_Fade(RGB_colors_e color)
-{
-  RGBlib_SetBrightness(0);
-  RGBlib_SetColorAll(color, 0);
-  for (uint8_t nBrightness = 0; nBrightness <= RGBlib_GetBrightnessMax(); nBrightness++)
-	{
-		RGBlib_SetBrightness(nBrightness);
-		WS2812_Delay_ms(100);
-	}
-
-  WS2812_Delay_ms(500);
-
-	for (uint8_t nBrightness = RGBlib_GetBrightnessMax() - 1; nBrightness > 0; nBrightness--)
-	{
-		RGBlib_SetBrightness(nBrightness + 1);
-		WS2812_Delay_ms(100);
-	}
-
-  RGBlib_SetColorAll(COLOR_BLACK, 0);
-	RGBlib_SetBrightness(RGBlib_GetBrightnessMax());
-}
-
 // ------------------------------------------------------------
-void RGBlib_SetColor(uint8_t position, RGB_colors_e color)
+
+
+// nastavi barvu jedne LED
+void RGBlib_SetLED(uint8_t position, RGB_colors_e color)
 {
   if (position < LEDS)
   {
 	  g_arrRGBbuff[position * 3] = (uint8_t)(color >> 16);
 	  g_arrRGBbuff[position * 3 + 1] = (uint8_t)(color >> 8);
 	  g_arrRGBbuff[position * 3 + 2] = (uint8_t)color;
+  }
+}
+
+// nastavi barvu a jas jedne LED
+void RGBlib_SetLEDWithBrightness(uint8_t position, RGB_colors_e color, uint8_t nBrightness)
+{
+  if (position < LEDS)
+  {
+    g_arrRGBbuff[position * 3] = (uint8_t)(((color >> 16)) * WS2812_GetBrightnessValue(nBrightness)) >> 8;
+    g_arrRGBbuff[position * 3 + 1] = (uint8_t)(((color >> 8)) * WS2812_GetBrightnessValue(nBrightness)) >> 8;
+    g_arrRGBbuff[position * 3 + 2] = (uint8_t)((color) * WS2812_GetBrightnessValue(nBrightness)) >> 8;
   }
 }
 
@@ -321,22 +149,22 @@ void RGBlib_SetColorAll(RGB_colors_e color, uint16_t wait_ms)
 {
 	for (uint16_t i = 0; i < LEDS; i++)
 	{
-		RGBlib_SetColor(i, color);
-		RGBlib_Show();
+		RGBlib_SetLED(i, color);
 	}
 
+	RGBlib_Show();
 	WS2812_Delay_ms(wait_ms);
 }
 
 void RGBlib_Clear()
 {
-  RGBlib_SetColorAll(COLOR_BLACK, 0);
+  RGBlib_SetColorAll(c_black, 0);
 }
 
 void RGBlib_WaitAndClear(uint16_t wait_ms)
 {
 	RGBlib_Delay_ms(wait_ms);
-	RGBlib_SetColorAll(COLOR_BLACK, 0);
+	RGBlib_SetColorAll(c_black, 0);
 }
 
 uint32_t RGBlib_GetColorFromRGB(uint8_t r, uint8_t g, uint8_t b)
@@ -365,6 +193,11 @@ uint8_t RGBlib_GetBrightnessMax()
 	return WS2812_GetBrightnessMax();
 }
 
+uint8_t RGBlib_GetBrightnessValue(uint8_t nBrightness)
+{
+  return WS2812_GetBrightnessValue(nBrightness);
+}
+
 uint16_t RGBlib_GetLedsCount()
 {
 	return LEDS;
@@ -388,6 +221,10 @@ void RGBlib_Delay_ms(uint32_t delay_ms)
   WS2812_Delay_ms(delay_ms);
 }
 
+uint32_t RGBlib_GetTicks(void)
+{
+  return WS2812_GetTicks();
+}
 
 // ---------------------------------------------------------------------------------------------------------
 // ------------- RAINBOW --------------------------------------
@@ -631,58 +468,6 @@ void RGBlib_Delay_ms(uint32_t delay_ms)
 //  }
 //}
 
-
-// -----------------------------------------------------------------------------------
-
-//void rainbow(uint8_t wait) {
-//  uint16_t i, j;
-//
-//
-//  for(j=0; j<256; j++) {
-//    for(i=0; i<strip.numPixels(); i++) {
-//      strip.setPixelColor(i, Wheel((i+j) & 255));
-//    }
-//    strip.show();
-//    delay(wait);
-//  }
-//}
-//
-//
-//// Slightly different, this makes the rainbow equally distributed throughout
-//void rainbowCycle(uint8_t wait) {
-//  uint16_t i, j;
-//
-//
-//  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-//    for(i=0; i< strip.numPixels(); i++) {
-//      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
-//    }
-//    strip.show();
-//    delay(wait);
-//  }
-//}
-//
-//
-//
-// //Theatre-style crawling lights with rainbow effect
-// void theaterChaseRainbow(uint8_t wait) {
-//   for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-//     for (int q=0; q < 3; q++) {
-//       for (int i=0; i < strip.numPixels(); i=i+3) {
-//         strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
-//       }
-//       strip.show();
-//
-//
-//       delay(wait);
-//
-//
-//       for (int i=0; i < strip.numPixels(); i=i+3) {
-//         strip.setPixelColor(i+q, 0);        //turn every third pixel off
-//       }
-//     }
-//   }
-// }
 
 // -----------------------------------------------------------------------------------
 // Input a value 0 to 191 to get a color value.

@@ -1,42 +1,45 @@
 #include "effects.h"
 
+uint32_t g_nLeds;
 
 void Eff_RandomEffects()
 {
+  g_nLeds = RGBlib_GetLedsCount();
+
+
+  Eff_Stars(c_blue, 20000);
+  return;
+
   uint32_t rnd = RGBlib_Rand(1, 16);
   switch (rnd)
   {
     case  1: Eff_ColorWhipe(); break;
-    case  2: RGBlib_ColorWipeCenter(COLOR_BLUE, 150);
-             RGBlib_Delay_ms(1000); break;
-    case  3: RGBlib_ColorWipeCenter(COLOR_WHITE_DARK, 120);
-             RGBlib_Delay_ms(1000); break;
-    case  4: RGBlib_Rainbow(10, 10); break;
+    case  2: RGBlib_ColorWipeCenter(c_blue, 150); break;
+    case  3: RGBlib_ColorWipeCenter(c_white_dark, 120); break;
+    case  4: Eff_Rainbow(10, 10); break;
     case  5: Eff_SpeedRotateLed(); break;
-    case  6: RGBlib_TheaterChase(COLOR_RED, 30, 3, 150); break;
-    case  7: RGBlib_TheaterChase(COLOR_YELLOW, 40, 3, 100); break;
-    case  8: RGBlib_TheaterChase(COLOR_BLUE, 50, 3, 70); break;
-    case  9: RGBlib_TheaterChaseTwoColor(COLOR_RED, COLOR_BLUE, 10, 500); break;
-    case 10: RGBlib_TheaterChaseTwoColorRotate(COLOR_RED, COLOR_BLUE, 10, 100); break;
-    case 11: RGBlib_RainbowCycle(5, 10); break;
-    case 12: RGBlib_Detonate(COLOR_GREEN, 600); break;
-    case 13: RGBlib_Fade(COLOR_RED);
-             RGBlib_Delay_ms(500); break;
-    case 14: RGBlib_Fade(COLOR_BLUE);
-             RGBlib_Delay_ms(500); break;
-    case 15: RGBlib_Fade(COLOR_YELLOW);
-             RGBlib_Delay_ms(500); break;
-    case 16: Eff_ColorWhipe(); break;
+    case  6: Eff_TheaterChase(c_red, 30, 3, 150); break;
+    case  7: Eff_TheaterChase(c_yellow, 40, 3, 100); break;
+    case  8: Eff_TheaterChase(c_blue, 50, 3, 70); break;
+    case  9: Eff_TheaterChaseTwoColor(c_red, c_blue, 10, 500); break;
+    case 10: Eff_TheaterChaseTwoColor(c_yellow, c_blue, 10, 500); break;
+    case 11: Eff_TheaterChaseTwoColorRotate(c_yellow, c_blue, 10, 100); break;
+    case 12: Eff_TheaterChaseTwoColorRotate(c_red, c_blue, 10, 100); break;
+    case 13: Eff_RainbowCycle(5, 10); break;
+    case 14: Eff_Detonate(c_green, 600); break;
+    case 15: Eff_Fade(RGBlib_GetRandomColor()); break;
+    case 16: Eff_Stars(RGBlib_GetRandomColor(), 20000); break;
+    case 17: break;
     default: break;
   }
 }
 
 void Eff_ColorWhipe()
 {
-  RGBlib_ColorWipe(COLOR_RED, 120, true);
-	RGBlib_ColorWipe(COLOR_BLUE, 120, false);
-	RGBlib_ColorWipe(COLOR_GREEN, 120, false);
-	RGBlib_ColorWipe(COLOR_BLACK, 120, false);
+  RGBlib_ColorWipe(c_red, 120, true);
+	RGBlib_ColorWipe(c_blue, 120, false);
+	RGBlib_ColorWipe(c_green, 120, false);
+	RGBlib_ColorWipe(c_black, 120, false);
 	RGBlib_Delay_ms(1000);
 }
 
@@ -44,14 +47,14 @@ void Eff_Tears()
 {
 	for (uint8_t cycles = 0; cycles < 5; cycles++)
 	{
-		for (uint8_t i = 0; i < RGBlib_GetLedsCount() / 2; i++)
+		for (uint8_t i = 0; i < g_nLeds / 2; i++)
 		{
-			RGBlib_SetColor(i, COLOR_RED);
-			RGBlib_SetColor(RGBlib_GetLedsCount() - 1 - i, COLOR_RED);
+			RGBlib_SetLED(i, c_red);
+			RGBlib_SetLED(g_nLeds - 1 - i, c_red);
 			RGBlib_Show();
 			RGBlib_Delay_ms(100);
-			RGBlib_SetColor(i, COLOR_BLACK);
-			RGBlib_SetColor(RGBlib_GetLedsCount() - 1 - i, COLOR_BLACK);
+			RGBlib_SetLED(i, c_black);
+			RGBlib_SetLED(g_nLeds - 1 - i, c_black);
 		}
 
 		RGBlib_Delay_ms(RGBlib_GetRandomNumber(300, 1000));
@@ -59,49 +62,256 @@ void Eff_Tears()
 
 }
 
-void Eff_Stars()
+//Theatre-style crawling lights.
+void Eff_TheaterChase(RGB_colors_e color, uint8_t cycles, uint8_t space, uint16_t wait_ms)
 {
-	for (uint8_t i = 0; i < RGBlib_GetLedsCount(); i++)
-	{
-		uint32_t nColor = RGBlib_GetColor(i);
-		if (nColor == 0)
-		{
-			uint8_t nRnd = RGBlib_GetRandomNumber(1, 20);
-			if (nRnd == 1)
-			{
-				RGBlib_SetColor(i, COLOR_BLACK);
-			}
-		}
-	}
+  RGBlib_Clear();
+  while (cycles--)
+  {
+    for (uint8_t q = 0; q < space; q++)
+    {
+      for (uint8_t i = 0; i < g_nLeds; i += space)
+      {
+        RGBlib_SetLED(i + q, color);    //turn every third pixel on
+      }
 
-	RGBlib_Delay_ms(50);
+      RGBlib_Show();
+      RGBlib_Delay_ms(wait_ms);
+
+      for (uint8_t i = 0; i < g_nLeds; i += space)
+      {
+        RGBlib_SetLED(i + q, c_black);        //turn every third pixel off
+      }
+    }
+  }
+}
+
+// stridani dvou barev
+void Eff_TheaterChaseTwoColor(RGB_colors_e color1, RGB_colors_e color2, uint8_t cycles, uint16_t wait_ms)
+{
+  RGBlib_Clear();
+  while (cycles--)
+  {
+    for (uint8_t i = 0; i < g_nLeds; i += 2)
+    {
+      RGBlib_SetLED(i, color1);
+      RGBlib_SetLED(i + 1, color2);
+    }
+
+    RGBlib_Show();
+    RGBlib_Delay_ms(wait_ms);
+
+    for (uint8_t i = 0; i < g_nLeds; i += 2)
+    {
+      RGBlib_SetLED(i, color2);
+      RGBlib_SetLED(i + 1, color1);
+    }
+
+    RGBlib_Show();
+    RGBlib_Delay_ms(wait_ms);
+  }
+}
+
+void Eff_TheaterChaseTwoColorRotate(RGB_colors_e color1, RGB_colors_e color2, uint8_t cycles, uint16_t wait_ms)
+{
+  RGBlib_Clear();
+  while (cycles--)
+  {
+    for (uint8_t space = 0; space < RGBlib_GetLedsCount() / 2; space++)
+    {
+      for (uint8_t i = 0; i < g_nLeds; i += (g_nLeds / 2))
+      {
+          RGBlib_SetLED(i + space, color1);
+          RGBlib_SetLED(i + 3 - space, color2);
+      }
+
+      RGBlib_Show();
+      RGBlib_Delay_ms(wait_ms);
+      RGBlib_Clear();
+    }
+  }
+}
+
+// //Theatre-style crawling lights with rainbow effect
+void Eff_TheaterChaseRainbow(uint16_t wait_ms)
+{
+
+  for (uint8_t j = 0; j < 256; j++) // cycle all 256 colors in the wheel
+  {
+    for (uint8_t q = 0; q < 3; q++)
+    {
+      for (uint8_t i = 0; i < RGBlib_GetLedsCount(); i = i + 3)
+      {
+        RGBlib_SetLED(i + q, RGBlib_Wheel((i + j) % 255));    //turn every third pixel on
+      }
+
+      RGBlib_Show();
+      RGBlib_Delay_ms(wait_ms);
+
+      for (uint8_t i = 0; i < g_nLeds; i = i + 3)
+      {
+        RGBlib_SetLED(i + q, 0);        //turn every third pixel off
+      }
+    }
+  }
+}
+
+void Eff_Rainbow(uint8_t cycles, uint16_t wait_ms)
+{
+  RGBlib_Clear();
+  for (uint16_t j = 0; j < 256 * cycles; j++)
+  {
+    for (uint16_t i = 0; i < g_nLeds; i++)
+    {
+      RGBlib_SetLED(i, RGBlib_Wheel((i + j) & 255));
+    }
+
+    RGBlib_Show();
+    RGBlib_Delay_ms(wait_ms);
+  }
+}
+
+void Eff_RainbowCycle(uint8_t cycles, uint16_t wait_ms)
+{
+  RGBlib_Clear();
+  for (uint16_t j = 0; j < 256 * cycles; j++)
+  {
+    for (uint16_t i = 0; i < g_nLeds; i++)
+    {
+      RGBlib_SetLED(i, RGBlib_Wheel(((i * 256 / g_nLeds) + j) & 255));
+    }
+
+    RGBlib_Show();
+    RGBlib_Delay_ms(wait_ms);
+  }
+
+  RGBlib_Clear();
+}
+
+void Eff_Fade(RGB_colors_e color)
+{
+  RGBlib_SetBrightness(0);
+  RGBlib_SetColorAll(color, 0);
+  for (uint8_t nBrightness = 0; nBrightness <= RGBlib_GetBrightnessMax(); nBrightness++)
+  {
+    RGBlib_SetBrightness(nBrightness);
+    RGBlib_Delay_ms(100);
+  }
+
+  RGBlib_Delay_ms(500);
+
+  for (uint8_t nBrightness = RGBlib_GetBrightnessMax() - 1; nBrightness > 0; nBrightness--)
+  {
+    RGBlib_SetBrightness(nBrightness + 1);
+    RGBlib_Delay_ms(100);
+  }
+
+  RGBlib_SetColorAll(c_black, 0);
+  RGBlib_SetBrightness(RGBlib_GetBrightnessMax());
+  RGBlib_Delay_ms(500);
+}
+
+// --------------------- DETONATE --------------------------------------------------
+void Eff_Detonate(RGB_colors_e color, uint16_t nStartDelay_ms)
+{
+  while (nStartDelay_ms)
+  {
+    RGBlib_SetColorAll(color, 0);   // Flash the color
+    RGBlib_Delay_ms(6);
+    RGBlib_Clear();
+    RGBlib_Delay_ms(nStartDelay_ms);
+    nStartDelay_ms = (nStartDelay_ms * 10) / 11;    // delay between flashes is halved each time until zero
+  }
+
+  RGBlib_SetColorAll(color, 0);
+  RGBlib_Delay_ms(1000);
+
+  // Then we fade to black....
+  for (uint16_t nBrightness = RGBlib_GetBrightnessMax(); nBrightness > 0; nBrightness--)
+  {
+    RGBlib_SetBrightness(nBrightness);
+    RGBlib_Delay_ms(100);
+  }
+
+  RGBlib_SetColorAll(c_black, 500);
+  RGBlib_SetBrightness(RGBlib_GetBrightnessMax());
+}
+
+void Eff_Stars(RGB_colors_e color, uint32_t nDuration_ms)
+{
+  uint8_t arrBrightness[g_nLeds];
+  uint8_t nMaxBrigntness = RGBlib_GetBrightnessMax();
+  uint8_t nCutDown = 0x80;
+  uint32_t nStartTime = RGBlib_GetTicks();
+
+  for (uint8_t i = 0; i < g_nLeds; i++)
+  {
+    arrBrightness[i] = 0;
+  }
+
+  while (RGBlib_GetTicks() < nStartTime + nDuration_ms)
+  {
+    uint8_t nBrightness = arrBrightness[g_nLeds];
+    for (uint8_t i = 0; i < g_nLeds; i++)
+    {
+      if (nBrightness == 0)
+      {
+        uint8_t nRnd = RGBlib_Rand(1, 20);
+        if (nRnd == 1)
+        {
+          nBrightness = 1;
+        }
+      }
+      else
+      {
+        // zmena jasu
+        if (nBrightness & nCutDown)
+        {
+          nBrightness--;
+        }
+        else
+        {
+          nBrightness++;
+          if (nBrightness == nMaxBrigntness)
+          {
+            nBrightness |= nCutDown;
+          }
+        }
+      }
+
+      arrBrightness[g_nLeds] = nBrightness;
+      RGBlib_SetLEDWithBrightness(i, color, nBrightness);
+    }
+
+    RGBlib_Delay_ms(20);
+  }
 }
 
 void Eff_SpeedRotateLed()
 {
     for (uint8_t i = 110; i > 0; i -= 10)  // zrychlujici scanner
     {
-      RGBlib_Scanner(COLOR_GREEN, i, false);
+      RGBlib_Scanner(c_green, i, false);
     }
 
     for (uint8_t w = 0; w < 12; w++)     // drzet
     {
-      RGBlib_Scanner(COLOR_GREEN, 10, false);
+      RGBlib_Scanner(c_green, 10, false);
     }
 
     for (uint8_t w = 0; w < 12; w++)     // drzet
     {
-      RGBlib_Scanner(COLOR_RED, 10, false);
+      RGBlib_Scanner(c_red, 10, false);
     }
 
     for (uint8_t w = 0; w < 12; w++)     // drzet
     {
-      RGBlib_Scanner(COLOR_BLUE, 10, false);
+      RGBlib_Scanner(c_blue, 10, false);
     }
 
     for (uint8_t i = 10; i < 90; i += 10)  // zpomalujici scanner
     {
-        RGBlib_Scanner(COLOR_BLUE, i, false);
+        RGBlib_Scanner(c_blue, i, false);
     }
 
     RGBlib_Delay_ms(2000);
@@ -132,7 +342,7 @@ void Eff_Candle(RGB_colors_e color)
     }
     else
     {
-      RGBlib_SetColorAll(COLOR_BLACK, 0);
+      RGBlib_SetColorAll(c_black, 0);
     }
 
  		// FRAME
@@ -172,9 +382,9 @@ void Eff_Candle(RGB_colors_e color)
 void Eff_Test()
 {
 	RGBlib_Delay_ms(1000);
-	RGBlib_SetColorAll(COLOR_RED, 1000);
-	RGBlib_SetColorAll(COLOR_GREEN, 1000);
-	RGBlib_SetColorAll(COLOR_BLUE, 1000);
+	RGBlib_SetColorAll(c_red, 1000);
+	RGBlib_SetColorAll(c_green, 1000);
+	RGBlib_SetColorAll(c_blue, 1000);
 	RGBlib_Clear();
 	RGBlib_Delay_ms(1000);
 }
