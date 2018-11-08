@@ -38,7 +38,7 @@ void RGBlib_SetLED(uint8_t position, RGB_colors_e color);
 void RGBlib_SetLEDWithBrightness(uint8_t position, RGB_colors_e color, uint8_t nBrightness);
 uint32_t RGBlib_GetColor(uint8_t position);
 void RGBlib_SetColorAll(RGB_colors_e color, uint16_t wait_ms);
-void RGBlib_Clear();
+void RGBlib_Clear(void);
 void RGBlib_WaitAndClear(uint16_t wait_ms);
 uint32_t RGBlib_GetColorFromRGB(uint8_t r, uint8_t g, uint8_t b);
 void RGBlib_SetBrightness(uint8_t nBrightness);

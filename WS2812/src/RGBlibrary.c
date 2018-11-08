@@ -156,7 +156,7 @@ void RGBlib_SetColorAll(RGB_colors_e color, uint16_t wait_ms)
 	WS2812_Delay_ms(wait_ms);
 }
 
-void RGBlib_Clear()
+void RGBlib_Clear(void)
 {
   RGBlib_SetColorAll(c_black, 0);
 }

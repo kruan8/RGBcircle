@@ -2,12 +2,13 @@
 
 uint32_t g_nLeds;
 
-void Eff_RandomEffects()
+void Eff_EffectsLoop()
 {
   g_nLeds = RGBlib_GetLedsCount();
 
-
+  Eff_Tears();
   Eff_Stars(c_blue, 20000);
+  Eff_Tears2(c_red);
   return;
 
   uint32_t rnd = RGBlib_Rand(1, 16);
@@ -43,21 +44,60 @@ void Eff_ColorWhipe()
 	RGBlib_Delay_ms(1000);
 }
 
+void Eff_Tears2(RGB_colors_e eColor)
+{
+  const uint8_t nTearLength = 6;
+  for (uint8_t cycles = 0; cycles < 5; cycles++)
+  {
+    for (uint8_t i = 0; i < g_nLeds / 2; i++)
+    {
+      uint8_t nBrightness = RGBlib_GetBrightnessMax();
+      for (uint8_t nLength = 0; nLength < nTearLength; nLength++)
+      {
+        RGBlib_SetLEDWithBrightness(i - nLength, eColor, nBrightness);
+        nBrightness = nBrightness / nTearLength * nLength;
+        if (nLength == i)
+        {
+          break;
+        }
+      }
+
+      RGBlib_Show();
+      RGBlib_WaitAndClear(100);
+    }
+
+    // vysunout ven
+    for (uint8_t nLength = 0; nLength < nTearLength; nLength++)
+    {
+      for (uint8_t l = 0; l < nTearLength; l++)
+      {
+        uint32_t nColor = RGBlib_GetColor(g_nLeds - 1 - l);
+        RGBlib_SetLED(g_nLeds - l, nColor);
+      }
+
+      RGBlib_Show();
+      RGBlib_WaitAndClear(100);
+    }
+
+    RGBlib_Delay_ms(RGBlib_Rand(300, 1000));
+  }
+}
+
 void Eff_Tears()
 {
 	for (uint8_t cycles = 0; cycles < 5; cycles++)
 	{
 		for (uint8_t i = 0; i < g_nLeds / 2; i++)
 		{
-			RGBlib_SetLED(i, c_red);
-			RGBlib_SetLED(g_nLeds - 1 - i, c_red);
-			RGBlib_Show();
-			RGBlib_Delay_ms(100);
-			RGBlib_SetLED(i, c_black);
-			RGBlib_SetLED(g_nLeds - 1 - i, c_black);
+      RGBlib_SetLED(i, c_red);
+      RGBlib_SetLED(g_nLeds - 1 - i, c_red);
+      RGBlib_Show();
+      RGBlib_Delay_ms(100);
+      RGBlib_SetLED(i, c_black);
+      RGBlib_SetLED(g_nLeds - 1 - i, c_black);
 		}
 
-		RGBlib_Delay_ms(RGBlib_GetRandomNumber(300, 1000));
+		RGBlib_Delay_ms(RGBlib_Rand(300, 1000));
 	}
 
 }
