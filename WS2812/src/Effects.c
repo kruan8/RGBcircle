@@ -6,10 +6,16 @@ void Eff_EffectsLoop()
 {
   g_nLeds = RGBlib_GetLedsCount();
 
-  Eff_Tears();
-  Eff_Stars(c_blue, 20000);
-  Eff_Tears2(c_red);
-  return;
+//  while (1)
+//  {
+//    Eff_TheaterChaseTwoColorRotate(c_red, c_blue, 10, 100);
+//
+////    Eff_Tears2(c_red);
+////    Eff_Tears();
+//
+//  }
+
+
 
   uint32_t rnd = RGBlib_Rand(1, 16);
   switch (rnd)
@@ -19,17 +25,17 @@ void Eff_EffectsLoop()
     case  3: RGBlib_ColorWipeCenter(c_white_dark, 120); break;
     case  4: Eff_Rainbow(10, 10); break;
     case  5: Eff_SpeedRotateLed(); break;
-    case  6: Eff_TheaterChase(c_red, 30, 3, 150); break;
-    case  7: Eff_TheaterChase(c_yellow, 40, 3, 100); break;
-    case  8: Eff_TheaterChase(c_blue, 50, 3, 70); break;
+    case  6: Eff_TheaterChase(RGBlib_GetRandomColor(), 30, 3, 150); break;
+    case  7: Eff_Stars(RGBlib_GetRandomColor(), 20000); break;
+    case  8: Eff_Fade(RGBlib_GetRandomColor()); break;
     case  9: Eff_TheaterChaseTwoColor(c_red, c_blue, 10, 500); break;
     case 10: Eff_TheaterChaseTwoColor(c_yellow, c_blue, 10, 500); break;
     case 11: Eff_TheaterChaseTwoColorRotate(c_yellow, c_blue, 10, 100); break;
     case 12: Eff_TheaterChaseTwoColorRotate(c_red, c_blue, 10, 100); break;
     case 13: Eff_RainbowCycle(5, 10); break;
     case 14: Eff_Detonate(c_green, 600); break;
-    case 15: Eff_Fade(RGBlib_GetRandomColor()); break;
-    case 16: Eff_Stars(RGBlib_GetRandomColor(), 20000); break;
+    case 15: break;
+    case 16: break;
     case 17: break;
     default: break;
   }
@@ -37,25 +43,25 @@ void Eff_EffectsLoop()
 
 void Eff_ColorWhipe()
 {
-  RGBlib_ColorWipe(c_red, 120, true);
-	RGBlib_ColorWipe(c_blue, 120, false);
-	RGBlib_ColorWipe(c_green, 120, false);
-	RGBlib_ColorWipe(c_black, 120, false);
+  RGBlib_ColorWipe(c_red, 80, true);
+	RGBlib_ColorWipe(c_blue, 80, false);
+	RGBlib_ColorWipe(c_green, 80, false);
+	RGBlib_ColorWipe(c_black, 80, false);
 	RGBlib_Delay_ms(1000);
 }
 
 void Eff_Tears2(RGB_colors_e eColor)
 {
   const uint8_t nTearLength = 6;
+  const uint8_t arrBrightness[] = { 31, 25, 20, 15, 10, 5};
   for (uint8_t cycles = 0; cycles < 5; cycles++)
   {
     for (uint8_t i = 0; i < g_nLeds / 2; i++)
     {
-      uint8_t nBrightness = RGBlib_GetBrightnessMax();
+      RGBlib_Clear();
       for (uint8_t nLength = 0; nLength < nTearLength; nLength++)
       {
-        RGBlib_SetLEDWithBrightness(i - nLength, eColor, nBrightness);
-        nBrightness = nBrightness / nTearLength * nLength;
+        RGBlib_SetLEDWithBrightness(i - nLength, eColor, arrBrightness[nLength]);
         if (nLength == i)
         {
           break;
@@ -63,20 +69,20 @@ void Eff_Tears2(RGB_colors_e eColor)
       }
 
       RGBlib_Show();
-      RGBlib_WaitAndClear(100);
+      RGBlib_Delay_ms(100);
     }
 
     // vysunout ven
     for (uint8_t nLength = 0; nLength < nTearLength; nLength++)
     {
-      for (uint8_t l = 0; l < nTearLength; l++)
+      for (uint8_t nPos = 0; nPos < nTearLength; nPos++)
       {
-        uint32_t nColor = RGBlib_GetColor(g_nLeds - 1 - l);
-        RGBlib_SetLED(g_nLeds - l, nColor);
+        uint32_t nColor = RGBlib_GetColor(g_nLeds / 2 - 2 - nPos);
+        RGBlib_SetLED(g_nLeds / 2 - 1 - nPos, nColor);
       }
 
       RGBlib_Show();
-      RGBlib_WaitAndClear(100);
+      RGBlib_Delay_ms(100);
     }
 
     RGBlib_Delay_ms(RGBlib_Rand(300, 1000));
@@ -92,7 +98,7 @@ void Eff_Tears()
       RGBlib_SetLED(i, c_red);
       RGBlib_SetLED(g_nLeds - 1 - i, c_red);
       RGBlib_Show();
-      RGBlib_Delay_ms(100);
+      RGBlib_Delay_ms(50);
       RGBlib_SetLED(i, c_black);
       RGBlib_SetLED(g_nLeds - 1 - i, c_black);
 		}
@@ -281,7 +287,7 @@ void Eff_Stars(RGB_colors_e color, uint32_t nDuration_ms)
 {
   uint8_t arrBrightness[g_nLeds];
   uint8_t nMaxBrigntness = RGBlib_GetBrightnessMax();
-  uint8_t nCutDown = 0x80;
+  const uint8_t nCutDown = 0x80;
   uint32_t nStartTime = RGBlib_GetTicks();
 
   for (uint8_t i = 0; i < g_nLeds; i++)
@@ -291,12 +297,12 @@ void Eff_Stars(RGB_colors_e color, uint32_t nDuration_ms)
 
   while (RGBlib_GetTicks() < nStartTime + nDuration_ms)
   {
-    uint8_t nBrightness = arrBrightness[g_nLeds];
     for (uint8_t i = 0; i < g_nLeds; i++)
     {
+      uint8_t nBrightness = arrBrightness[i];
       if (nBrightness == 0)
       {
-        uint8_t nRnd = RGBlib_Rand(1, 20);
+        uint8_t nRnd = RGBlib_Rand(1, 50);
         if (nRnd == 1)
         {
           nBrightness = 1;
@@ -308,6 +314,10 @@ void Eff_Stars(RGB_colors_e color, uint32_t nDuration_ms)
         if (nBrightness & nCutDown)
         {
           nBrightness--;
+          if (nBrightness == nCutDown)
+          {
+            nBrightness = 0;
+          }
         }
         else
         {
@@ -319,11 +329,12 @@ void Eff_Stars(RGB_colors_e color, uint32_t nDuration_ms)
         }
       }
 
-      arrBrightness[g_nLeds] = nBrightness;
-      RGBlib_SetLEDWithBrightness(i, color, nBrightness);
+      arrBrightness[i] = nBrightness;
+      RGBlib_SetLEDWithBrightness(i, color, nBrightness & ~nCutDown);
     }
 
-    RGBlib_Delay_ms(20);
+    RGBlib_Show();
+    RGBlib_Delay_ms(5);
   }
 }
 

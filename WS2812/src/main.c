@@ -13,6 +13,17 @@
 #include "effects.h"
 #include <string.h>
 
+
+/*
+ *  Detonate: náhodna barva
+ *  ColorWhipeCenter: mazat obracene
+ *  TheaterChaseTwoColor:  asi zrusit, stejne jako rotate
+ *  TheaterChaseTwoColorRotate: pole 4/4, 5 sekund stat a pak rotovat (rotovani neni napsany)
+ *
+ *
+ */
+
+
 int main(void)
 {
 	// kontrola hodin
@@ -22,7 +33,7 @@ int main(void)
 	RGBlib_Init();
 
   // test svitivosti vsech barev
-	Eff_Test();
+//	Eff_Test();
 
 //  while (1)
 //  {

@@ -220,7 +220,7 @@ uint8_t WS2812_GetBrightnessMax()
 
 uint8_t WS2812_GetBrightnessValue(uint8_t nBrightness)
 {
-  return GammaBrightness5[g_nBrightness];
+  return GammaBrightness5[nBrightness];
 }
 
 void WS2812_Fill(uint8_t *buffer, uint8_t *color)

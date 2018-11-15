@@ -118,20 +118,23 @@ void RGBlib_SetLED(uint8_t position, RGB_colors_e color)
 {
   if (position < LEDS)
   {
-	  g_arrRGBbuff[position * 3] = (uint8_t)(color >> 16);
-	  g_arrRGBbuff[position * 3 + 1] = (uint8_t)(color >> 8);
-	  g_arrRGBbuff[position * 3 + 2] = (uint8_t)color;
+    position *= 3;
+	  g_arrRGBbuff[position] = (uint8_t)(color >> 16);
+	  g_arrRGBbuff[position + 1] = (uint8_t)(color >> 8);
+	  g_arrRGBbuff[position + 2] = (uint8_t)color;
   }
 }
 
 // nastavi barvu a jas jedne LED
-void RGBlib_SetLEDWithBrightness(uint8_t position, RGB_colors_e color, uint8_t nBrightness)
+void RGBlib_SetLEDWithBrightness(uint8_t position, RGB_colors_e eColor, uint8_t nBrightness)
 {
   if (position < LEDS)
   {
-    g_arrRGBbuff[position * 3] = (uint8_t)(((color >> 16)) * WS2812_GetBrightnessValue(nBrightness)) >> 8;
-    g_arrRGBbuff[position * 3 + 1] = (uint8_t)(((color >> 8)) * WS2812_GetBrightnessValue(nBrightness)) >> 8;
-    g_arrRGBbuff[position * 3 + 2] = (uint8_t)((color) * WS2812_GetBrightnessValue(nBrightness)) >> 8;
+    uint8_t *pColor = (uint8_t*) &eColor;
+
+    g_arrRGBbuff[position * 3 + 2] = ((uint16_t)pColor[0] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
+    g_arrRGBbuff[position * 3 + 1] = ((uint16_t)pColor[1] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
+    g_arrRGBbuff[position * 3 + 0] = ((uint16_t)pColor[2] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
   }
 }
 
@@ -139,6 +142,7 @@ uint32_t RGBlib_GetColor(uint8_t position)
 {
   if (position < LEDS)
   {
+    position *= 3;
 	  return (g_arrRGBbuff[position] << 16) + (g_arrRGBbuff[position + 1] << 8) + g_arrRGBbuff[position + 2];
   }
 
@@ -205,14 +209,19 @@ uint16_t RGBlib_GetLedsCount()
 
 uint32_t RGBlib_Rand(uint32_t nMin, uint32_t nMax)
 {
+  if (nMin == nMax)
+  {
+    return nMin;
+  }
+
   uint32_t rnd = WS2812_GetRandomNumber();
-  rnd = (rnd % (nMax - nMin + 1)) + nMin;
+  rnd = (rnd % (nMax + 1 - nMin)) + nMin;
   return rnd;
 }
 
 RGB_colors_e RGBlib_GetRandomColor()
 {
-	uint8_t c = RGBlib_Rand(1, sizeof(colors));
+	uint8_t c = RGBlib_Rand(1, sizeof(colors) / sizeof (RGB_colors_e));
 	return colors[--c];
 }
 
