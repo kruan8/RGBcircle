@@ -15,10 +15,14 @@
 
 
 /*
- *  Detonate: náhodna barva
+ * RGBcircle
+ * ----------------------------------------------------------------------------------
+ * efektovy kruh pro 60 LED WS2812B
+ *
+ * v0.1: initial version
+ *
+ *
  *  ColorWhipeCenter: mazat obracene
- *  TheaterChaseTwoColor:  asi zrusit, stejne jako rotate
- *  TheaterChaseTwoColorRotate: pole 4/4, 5 sekund stat a pak rotovat (rotovani neni napsany)
  *
  *
  */

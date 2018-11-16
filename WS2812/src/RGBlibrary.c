@@ -11,7 +11,7 @@
 #define LEDS 60
 #define BUFF_SIZE (LEDS * 3)
 
-RGB_colors_e colors[] = { c_red, c_green, c_blue, c_white_dark, c_violet };  // pouzita paleta barev
+RGB_colors_e colors[] = { c_red, c_green, c_blue, c_white_dark, c_violet, c_yellow };  // pouzita paleta barev
 
 uint8_t g_arrRGBbuff[BUFF_SIZE];
 
@@ -37,32 +37,7 @@ void RGBlib_ColorWipe(RGB_colors_e color, uint16_t wait_ms, bool bClear)
   }
 }
 
-// color wipe from center
-void RGBlib_ColorWipeCenter(RGB_colors_e color, uint16_t wait_ms)
-{
-  RGBlib_Clear();
 
-	uint8_t mid = LEDS / 2;
-	RGBlib_SetLED(mid, color);
-	for (uint16_t i = 0; i <= LEDS / 2; i++)
-	{
-		RGBlib_SetLED(mid + i, color);
-		RGBlib_SetLED(mid - i, color);
-		RGBlib_Show();
-		WS2812_Delay_ms(wait_ms);
-	}
-
-	RGBlib_SetLED(mid, c_black);
-	for (uint16_t i = 0; i <= LEDS / 2; i++)
-	{
-		RGBlib_SetLED(mid + i, c_black);
-		RGBlib_SetLED(mid - i, c_black);
-		RGBlib_Show();
-		WS2812_Delay_ms(wait_ms);
-	}
-
-	WS2812_Delay_ms(1000);
-}
 
 void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn)
 {
@@ -111,7 +86,35 @@ uint32_t RGBlib_Wheel(uint8_t nWheelPos)
 }
 
 // ------------------------------------------------------------
+void RGBlib_RotateRight(uint32_t nDelay_ms)
+{
+  uint32_t nColorTmp =  RGBlib_GetColor(LEDS - 1);
+  for (uint32_t i = LEDS - 1; i > 0; i--)
+  {
+    uint32_t nColor = RGBlib_GetColor(i - 1);
+    RGBlib_SetLED(i, nColor);
+  }
 
+  RGBlib_SetLED(0, nColorTmp);
+
+  RGBlib_Show();
+  RGBlib_Delay_ms(nDelay_ms);
+}
+
+void RGBlib_RotateLeft(uint32_t nDelay_ms)
+{
+  uint32_t nColorTmp =  RGBlib_GetColor(0);
+  for (uint32_t i = 0; i > LEDS - 1; i++)
+  {
+    uint32_t nColor = RGBlib_GetColor(i + 1);
+    RGBlib_SetLED(i, nColor);
+  }
+
+  RGBlib_SetLED(LEDS - 1, nColorTmp);
+
+  RGBlib_Show();
+  RGBlib_Delay_ms(nDelay_ms);
+}
 
 // nastavi barvu jedne LED
 void RGBlib_SetLED(uint8_t position, RGB_colors_e color)
@@ -132,9 +135,10 @@ void RGBlib_SetLEDWithBrightness(uint8_t position, RGB_colors_e eColor, uint8_t 
   {
     uint8_t *pColor = (uint8_t*) &eColor;
 
-    g_arrRGBbuff[position * 3 + 2] = ((uint16_t)pColor[0] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
-    g_arrRGBbuff[position * 3 + 1] = ((uint16_t)pColor[1] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
-    g_arrRGBbuff[position * 3 + 0] = ((uint16_t)pColor[2] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
+    position *= 3;
+    g_arrRGBbuff[position + 2] = ((uint16_t)pColor[0] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
+    g_arrRGBbuff[position + 1] = ((uint16_t)pColor[1] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
+    g_arrRGBbuff[position + 0] = ((uint16_t)pColor[2] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
   }
 }
 

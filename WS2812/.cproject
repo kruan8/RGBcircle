@@ -122,21 +122,6 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="WS2812.fr.ac6.managedbuild.target.gnu.cross.exe.505436093" name="Executable"/>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="fr.ac6.managedbuild.config.gnu.cross.exe.release.835867421;fr.ac6.managedbuild.config.gnu.cross.exe.release.835867421.;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1631569431;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.c.965177012">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="fr.ac6.managedbuild.config.gnu.cross.exe.debug.2114107960;fr.ac6.managedbuild.config.gnu.cross.exe.debug.2114107960.;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1872415871;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.c.816198943">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="fr.ac6.managedbuild.config.gnu.cross.exe.release.1582234651;fr.ac6.managedbuild.config.gnu.cross.exe.release.1582234651.;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1098619762;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.c.1414570057">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="fr.ac6.managedbuild.config.gnu.cross.exe.debug.1473917061;fr.ac6.managedbuild.config.gnu.cross.exe.debug.1473917061.;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1480772574;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.c.860577237">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Debug">
@@ -147,4 +132,22 @@
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="fr.ac6.managedbuild.config.gnu.cross.exe.debug.1473917061;fr.ac6.managedbuild.config.gnu.cross.exe.debug.1473917061.;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1480772574;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.c.860577237">
+			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.atollic.truestudio.exe.debug.259197891;com.atollic.truestudio.exe.debug.259197891.;com.atollic.truestudio.exe.debug.toolchain.gcc.1025664939;com.atollic.truestudio.gcc.input.682827372">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.atollic.truestudio.mbs.ARMToolsPerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="fr.ac6.managedbuild.config.gnu.cross.exe.release.1582234651;fr.ac6.managedbuild.config.gnu.cross.exe.release.1582234651.;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1098619762;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.c.1414570057">
+			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="fr.ac6.managedbuild.config.gnu.cross.exe.release.835867421;fr.ac6.managedbuild.config.gnu.cross.exe.release.835867421.;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1631569431;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.c.965177012">
+			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="fr.ac6.managedbuild.config.gnu.cross.exe.debug.2114107960;fr.ac6.managedbuild.config.gnu.cross.exe.debug.2114107960.;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1872415871;fr.ac6.managedbuild.tool.gnu.cross.c.compiler.input.c.816198943">
+			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>

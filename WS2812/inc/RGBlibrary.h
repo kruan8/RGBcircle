@@ -34,6 +34,10 @@ void RGBlib_ColorWipeCenter(RGB_colors_e color, uint16_t wait_ms);
 void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn);
 uint32_t RGBlib_Wheel(uint8_t nWheelPos);
 uint32_t RGBlib_Rand(uint32_t nMin, uint32_t nMax);
+
+void RGBlib_RotateRight(uint32_t nDelay_ms);
+void RGBlib_RotateLeft(uint32_t nDelay_ms);
+
 void RGBlib_SetLED(uint8_t position, RGB_colors_e color);
 void RGBlib_SetLEDWithBrightness(uint8_t position, RGB_colors_e eColor, uint8_t nBrightness);
 uint32_t RGBlib_GetColor(uint8_t position);
