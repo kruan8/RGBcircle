@@ -55,5 +55,6 @@ void RGBlib_Delay_ms(uint32_t delay_ms);
 uint32_t RGBlib_GetTicks(void);
 uint32_t RGBlib_GetRandomNumber();
 RGB_colors_e RGBlib_GetRandomColor();
+bool RGBlib_IsDark(void);
 
 #endif /* RGBLIBRARY_H_ */

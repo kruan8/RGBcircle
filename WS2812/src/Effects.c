@@ -4,6 +4,12 @@ uint32_t g_nLeds;
 
 void Eff_EffectsLoop()
 {
+  if (!RGBlib_IsDark())
+  {
+    // uspat, jednou za sekundu kontrolovat
+    return;
+  }
+
   g_nLeds = RGBlib_GetLedsCount();
 
 //  while (1)
@@ -485,3 +491,286 @@ void Eff_Test()
 	RGBlib_Clear();
 	RGBlib_Delay_ms(1000);
 }
+
+
+
+// ---------------------------------------------------------------------------------------------------------
+// ------------- RAINBOW --------------------------------------
+// vypada to, ze se vysouvaji barvy duhy (rainbowcolors) z nulove pozice a pritom se upravuje jejich jas
+//#define MAXPIX 253
+//#define COLORLENGTH 100
+//#define FADE 5
+//
+//
+//struct cRGB colors[8];
+//struct cRGB led[MAXPIX];
+//
+//
+//int main(void)
+//{
+//
+//  uint8_t j = 1;
+//  uint8_t k = 1;
+//
+//
+//  DDRB|=_BV(ws2812_pin);
+//
+//    uint8_t i;
+//    for(i=MAXPIX; i>0; i--)
+//    {
+//        led[i-1].r=0;led[i-1].g=0;led[i-1].b=0;
+//    }
+//
+//    //Rainbowcolors
+//    colors[0].r=150; colors[0].g=150; colors[0].b=150;
+//    colors[1].r=255; colors[1].g=000; colors[1].b=000;//red
+//    colors[2].r=255; colors[2].g=100; colors[2].b=000;//orange
+//    colors[3].r=100; colors[3].g=255; colors[3].b=000;//yellow
+//    colors[4].r=000; colors[4].g=255; colors[4].b=000;//green
+//    colors[5].r=000; colors[5].g=100; colors[5].b=255;//light blue (türkis)
+//    colors[6].r=000; colors[6].g=000; colors[6].b=255;//blue
+//    colors[7].r=100; colors[7].g=000; colors[7].b=255;//violet
+//
+//  while(1)
+//    {
+//        //shift all vallues by one led
+//        uint8_t i=0;
+//        for(i=MAXPIX; i>1; i--)
+//            led[i-1]=led[i-2];
+//        //change colour when colourlength is reached
+//        if(k>COLORLENGTH)
+//        {
+//            j++;
+//           k=0;
+//       }
+//       k++;
+//       //loop colouers
+//       if(j>8)
+//           j=0;
+//
+//       //fade red
+//       if(led[0].r<colors[j].r)
+//           led[0].r+=FADE;
+//       if(led[0].r>255.r)
+//           led[0].r=255;
+//
+//       if(led[0].r>colors[j].r)
+//           led[0].r-=FADE;
+//   //    if(led[0].r<0)
+//   //        led[0].r=0;
+//       //fade green
+//       if(led[0].g<colors[j].g)
+//           led[0].g+=FADE;
+//       if(led[0].g>255)
+//           led[0].g=255;
+//
+//       if(led[0].g>colors[j].g)
+//           led[0].g-=FADE;
+//   //    if(led[0].g<0)
+//   //        led[0].g=0;
+//       //fade blue
+//       if(led[0].b<colors[j].b)
+//           led[0].b+=FADE;
+//       if(led[0].b>255)
+//           led[0].b=255;
+//
+//       if(led[0].b>colors[j].b)
+//           led[0].b-=FADE;
+//   //    if(led[0].b<0)
+//   //        led[0].b=0;
+//
+//
+//     _delay_ms(10);
+//     ws2812_sendarray((uint8_t *)led,MAXPIX*3);
+//    }
+//}
+
+
+// ------------------------------------------------------------------------------------
+// Theatre-style crawling lights.
+// Changes spacing to be dynmaic based on string size
+
+
+//#define THEATER_SPACING (PIXELS/20)
+//
+//
+//void theaterChase( unsigned char r , unsigned char g, unsigned char b, unsigned char wait ) {
+//
+//  for (int j=0; j< 3 ; j++) {
+//
+//    for (int q=0; q < THEATER_SPACING ; q++) {
+//
+//      unsigned int step=0;
+//
+//      cli();
+//
+//      for (int i=0; i < PIXELS ; i++) {
+//
+//        if (step==q) {
+//
+//          sendPixel( r , g , b );
+//
+//        } else {
+//
+//          sendPixel( 0 , 0 , 0 );
+//
+//        }
+//
+//        step++;
+//
+//        if (step==THEATER_SPACING) step =0;
+//
+//      }
+//
+//      sei();
+//
+//      show();
+//      delay(wait);
+//
+//    }
+//
+//  }
+//
+//}
+
+//---------------------------------------------------------------------------------------------
+// -------------------------- RAINBOW_CYCLE ----------------------------
+// I rewrite this one from scrtach to use high resolution for the color wheel to look nicer on a *much* bigger string
+
+//void rainbowCycle(unsigned char frames , unsigned int frameAdvance, unsigned int pixelAdvance ) {
+//
+//  // Hue is a number between 0 and 3*256 than defines a mix of r->g->b where
+//  // hue of 0 = Full red
+//  // hue of 128 = 1/2 red and 1/2 green
+//  // hue of 256 = Full Green
+//  // hue of 384 = 1/2 green and 1/2 blue
+//  // ...
+//
+//  unsigned int firstPixelHue = 0;     // Color for the first pixel in the string
+//
+//  for(unsigned int j=0; j<frames; j++) {
+//
+//    unsigned int currentPixelHue = firstPixelHue;
+//
+//    cli();
+//
+//    for(unsigned int i=0; i< PIXELS; i++) {
+//
+//      if (currentPixelHue>=(3*256)) {                  // Normalize back down incase we incremented and overflowed
+//        currentPixelHue -= (3*256);
+//      }
+//
+//      unsigned char phase = currentPixelHue >> 8;
+//      unsigned char step = currentPixelHue & 0xff;
+//
+//      switch (phase) {
+//
+//        case 0:
+//          sendPixel( ~step , step ,  0 );
+//          break;
+//
+//        case 1:
+//          sendPixel( 0 , ~step , step );
+//          break;
+//
+//
+//        case 2:
+//          sendPixel(  step ,0 , ~step );
+//          break;
+//
+//      }
+//
+//      currentPixelHue+=pixelAdvance;
+//
+//
+//    }
+//
+//    sei();
+//
+//    show();
+//
+//    firstPixelHue += frameAdvance;
+//
+//  }
+//}
+
+// --------------------------------------------------------------------------------------
+// ----  dalsi kody
+
+//void rainbow(uint8_t wait) {
+//  uint16_t i, j;
+//
+//  for(j=0; j<256; j++) {
+//    for(i=0; i<strip.numPixels(); i++) {
+//      strip.setPixelColor(i, Wheel((i+j) & 255));
+//    }
+//    strip.show();
+//    delay(wait);
+//  }
+//}
+//
+//// Slightly different, this makes the rainbow equally distributed throughout
+//void rainbowCycle(uint8_t wait) {
+//  uint16_t i, j;
+//
+//  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+//    for(i=0; i< strip.numPixels(); i++) {
+//      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+//    }
+//    strip.show();
+//    delay(wait);
+//  }
+//}
+//
+//// Input a value 0 to 255 to get a color value.
+//// The colours are a transition r - g - b - back to r.
+//uint32_t Wheel(byte WheelPos) {
+//  if(WheelPos < 85) {
+//   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+//  } else if(WheelPos < 170) {
+//   WheelPos -= 85;
+//   return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+//  } else {
+//   WheelPos -= 170;
+//   return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+//  }
+//}
+
+
+// -----------------------------------------------------------------------------------
+// Input a value 0 to 191 to get a color value.
+// The colors are a transition red->yellow->green->aqua->blue->fuchsia->red...
+//  Adapted from Wheel function in the Adafruit_NeoPixel library example sketch
+//uint32_t rainbowOrder(byte position)
+//{
+//  // 6 total zones of color change:
+//  if (position < 31)  // Red -> Yellow (Red = FF, blue = 0, green goes 00-FF)
+//  {
+//    return leds.Color(0xFF, position * 8, 0);
+//  }
+//  else if (position < 63)  // Yellow -> Green (Green = FF, blue = 0, red goes FF->00)
+//  {
+//    position -= 31;
+//    return leds.Color(0xFF - position * 8, 0xFF, 0);
+//  }
+//  else if (position < 95)  // Green->Aqua (Green = FF, red = 0, blue goes 00->FF)
+//  {
+//    position -= 63;
+//    return leds.Color(0, 0xFF, position * 8);
+//  }
+//  else if (position < 127)  // Aqua->Blue (Blue = FF, red = 0, green goes FF->00)
+//  {
+//    position -= 95;
+//    return leds.Color(0, 0xFF - position * 8, 0xFF);
+//  }
+//  else if (position < 159)  // Blue->Fuchsia (Blue = FF, green = 0, red goes 00->FF)
+//  {
+//    position -= 127;
+//    return leds.Color(position * 8, 0, 0xFF);
+//  }
+//  else  //160 <position< 191   Fuchsia->Red (Red = FF, green = 0, blue goes FF->00)
+//  {
+//    position -= 159;
+//    return leds.Color(0xFF, 0x00, 0xFF - position * 8);
+//  }
+//}

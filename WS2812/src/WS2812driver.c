@@ -172,30 +172,6 @@ void WS2812_Init()
 //	DMA_Cmd(DMA1_Channel4, ENABLE);
 //    TIM_Cmd(TIM3, ENABLE);
     // ---------------------------------
-	WS2812_AdInit();
-}
-
-void WS2812_AdInit(void)
-{
-  ADC_InitTypeDef ADC_InitStructure;
-
-  // Initialize ADC 14MHz RC
-  RCC_ADCCLKConfig(RCC_ADCCLK_HSI14);
-  RCC_HSI14Cmd(ENABLE);
-  while (!RCC_GetFlagStatus(RCC_FLAG_HSI14RDY));
-
-  ADC_DeInit(ADC1);
-  ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
-  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-  ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
-  ADC_InitStructure.ADC_ScanDirection = ADC_ScanDirection_Backward;
-  ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
-  ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_TRGO; //default
-  ADC_Init(ADC1, &ADC_InitStructure);
-
-  //Convert the ADC1 temperature sensor, user shortest sample time to generate most noise
-  ADC1->CHSELR |= (uint32_t)ADC_Channel_TempSensor;
-  ADC1->SMPR = 0;     // ADC_SampleTime_1_5Cycles
 }
 
 void WS2812_SetBrightness(uint8_t nBrightness)
@@ -339,48 +315,4 @@ void WS2812_Delay_ms(uint32_t delay_ms)
 uint32_t WS2812_GetTicks(void)
 {
   return g_nTicks;
-}
-
-uint32_t WS2812_GetRandomNumber()
-{
-  //enable ADC1 clock
-  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
-
-  //enable internal temperature sensor
-  ADC->CCR |= (uint32_t)ADC_CCR_TSEN;
-
-  // Enable ADCperipheral
-  ADC1->CR |= (uint32_t)ADC_CR_ADEN;
-  while (!(ADC1->ISR & ADC_FLAG_ADRDY));
-
-  // Enable CRC clock
-  RCC->AHBENR |= RCC_AHBENR_CRCEN;
-
-  for (uint8_t i = 0; i < 8; i++)
-  {
-    //Start ADC1 Software Conversion
-    ADC1->CR |= (uint32_t)ADC_CR_ADSTART;
-
-    //wait for conversion complete
-    while (!(ADC1->ISR = (uint32_t)ADC_FLAG_EOC));
-
-    CRC->DR = ADC1->DR;
-
-    //clear EOC flag
-//    ADC1->ISR = (uint32_t)ADC_FLAG_EOC;
-  }
-
-  CRC->DR = 0xBADA55E5;
-  uint32_t nValue = CRC->DR;
-
-  // disable temperature sensor to save power
-  ADC->CCR &= (uint32_t)(~ADC_CCR_TSEN);
-
-  // ADC disable
-  ADC1->CR |= (uint32_t)ADC_CR_ADDIS;
-
-  RCC->APB2ENR &= ~RCC_APB2Periph_ADC1;
-  RCC->AHBENR &= ~RCC_AHBENR_CRCEN;
-
-  return nValue;
 }
