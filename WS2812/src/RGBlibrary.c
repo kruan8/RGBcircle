@@ -104,7 +104,7 @@ void RGBlib_RotateRight(uint32_t nDelay_ms)
 void RGBlib_RotateLeft(uint32_t nDelay_ms)
 {
   uint32_t nColorTmp =  RGBlib_GetColor(0);
-  for (uint32_t i = 0; i > LEDS - 1; i++)
+  for (uint32_t i = 0; i < LEDS - 1; i++)
   {
     uint32_t nColor = RGBlib_GetColor(i + 1);
     RGBlib_SetLED(i, nColor);

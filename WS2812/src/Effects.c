@@ -8,7 +8,6 @@ void Eff_EffectsLoop()
 
 //  while (1)
 //  {
-//    Eff_TheaterChaseTwoColorRotate(c_red, c_blue, 10, 100);
 //
 ////    Eff_Tears2(c_red);
 ////    Eff_Tears();
@@ -28,8 +27,8 @@ void Eff_EffectsLoop()
     case  8: Eff_Fade(RGBlib_GetRandomColor()); break;
     case  9: Eff_TheaterChaseTwoColors(c_red, c_blue, 15, 1000); break;
     case 10: Eff_TheaterChaseTwoColors(c_yellow, c_blue, 15, 1000); break;
-    case 11: Eff_TheaterChaseTwoColorRotate(c_yellow, c_blue, 100); break;
-    case 12: Eff_TheaterChaseTwoColorRotate(c_red, c_blue, 100); break;
+    case 11: Eff_TheaterChaseTwoColorRotate(c_yellow, c_blue, 7000); break;
+    case 12: Eff_TheaterChaseTwoColorRotate(c_red, c_blue, 7000); break;
     case 13: Eff_RainbowCycle(5, 10); break;
     case 14: Eff_Detonate(RGBlib_GetRandomColor(), 600); break;
     case 15: break;
@@ -43,10 +42,10 @@ void Eff_EffectsLoop()
 // postupne vyplneni barvou
 void Eff_ColorWhipe()
 {
-  RGBlib_ColorWipe(c_red, 80, true);
-	RGBlib_ColorWipe(c_blue, 80, false);
-	RGBlib_ColorWipe(c_green, 80, false);
-	RGBlib_ColorWipe(c_black, 80, false);
+  RGBlib_ColorWipe(c_red, 60, true);
+	RGBlib_ColorWipe(c_blue, 60, false);
+	RGBlib_ColorWipe(c_green, 60, false);
+	RGBlib_ColorWipe(c_black, 60, false);
 	RGBlib_Delay_ms(1000);
 }
 
@@ -209,13 +208,13 @@ void Eff_TheaterChaseTwoColorRotate(RGB_colors_e color1, RGB_colors_e color2, ui
   RGBlib_Delay_ms(3000);
 
   uint32_t nTime = RGBlib_GetTicks();
-  while (nTime + nDuration_ms < RGBlib_GetTicks())
+  while (nTime + nDuration_ms > RGBlib_GetTicks())
   {
     RGBlib_RotateRight(50);
   }
 
   nTime = RGBlib_GetTicks();
-  while (nTime + nDuration_ms < RGBlib_GetTicks())
+  while (nTime + nDuration_ms > RGBlib_GetTicks())
   {
     RGBlib_RotateLeft(50);
   }
