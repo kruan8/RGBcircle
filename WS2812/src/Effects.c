@@ -4,11 +4,15 @@ uint32_t g_nLeds;
 
 void Eff_EffectsLoop()
 {
-  if (!RGBlib_IsDark())
+  while (1)
   {
-    // uspat, jednou za sekundu kontrolovat
-    return;
+    RGBlib_IsDark();
   }
+
+//  {
+//    // uspat, jednou za sekundu kontrolovat
+//    return;
+//  }
 
   g_nLeds = RGBlib_GetLedsCount();
 

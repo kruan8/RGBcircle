@@ -13,6 +13,6 @@
 void AD_Init(void);
 void AD_InitOpto(void);
 uint32_t AD_GetRandomNumber(void);
-uint32_t AD_GetOpto(void);
+uint32_t AD_GetOpto_mV(void);
 
 #endif /* AD_DRIVER_H_ */

@@ -244,7 +244,10 @@ uint32_t RGBlib_GetTicks(void)
 
 bool RGBlib_IsDark(void)
 {
-  uint32_t nOpto = AD_GetOpto();
+  uint32_t nOpto = AD_GetOpto_mV();
+
+  // rozhodovaci uroven bude 0,5V
+  //
   if (nOpto < 100)
   {
     return true;
