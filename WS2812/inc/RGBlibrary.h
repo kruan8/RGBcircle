@@ -25,7 +25,11 @@ typedef enum
   c_tyrkis     = 0x0064FF,  // svetele modra
 }RGB_colors_e;
 
-
+typedef enum
+{
+  light = 0,
+  dark,
+}light_mode_e;
 
 void RGBlib_Init();
 

@@ -12,10 +12,16 @@
 #define AD_OPTO_IN_PIN        GPIO_Pin_4
 #define AD_OPTO_IN_CLK        RCC_AHBPeriph_GPIOA
 
+#define AD_OPTO_CFG_PORT      GPIOA
+#define AD_OPTO_CFG_PIN       GPIO_Pin_10
+#define AD_OPTO_CFG_CLK       RCC_AHBPeriph_GPIOA
+
 #define AD_OPTO_INPUT         ADC_Channel_4
 
 #define AD_TEMP_CYCLES        8
 #define AD_OPTO_CYCLES        8
+
+
 
 void AD_Init(void)
 {
@@ -56,7 +62,7 @@ void AD_InitOpto(void)
   GPIO_StructInit(&InitStruct);
 
   // pin pro TIM3_CH1
-  RCC_AHBPeriphClockCmd(AD_OPTO_IN_CLK, ENABLE);
+  RCC_AHBPeriphClockCmd(AD_OPTO_IN_CLK | AD_OPTO_CFG_CLK, ENABLE);
 
   /* GPIOA Configuration: TIM3 Channel 1 as alternate function push-pull */
   InitStruct.GPIO_Pin = AD_OPTO_IN_PIN;
@@ -65,8 +71,14 @@ void AD_InitOpto(void)
   InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
   InitStruct.GPIO_Speed = GPIO_Speed_10MHz;
   GPIO_Init(AD_OPTO_IN_PORT, &InitStruct);
-}
 
+  InitStruct.GPIO_Pin = AD_OPTO_CFG_PIN;
+  InitStruct.GPIO_Mode = GPIO_Mode_IN;
+  InitStruct.GPIO_OType = GPIO_OType_PP;
+  InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+  InitStruct.GPIO_Speed = GPIO_Speed_2MHz;
+  GPIO_Init(AD_OPTO_CFG_PORT, &InitStruct);
+}
 
 uint32_t AD_GetRandomNumber(void)
 {
@@ -120,4 +132,9 @@ uint32_t AD_GetOpto_mV(void)
   nValue /= AD_OPTO_CYCLES;
 
   return nValue;
+}
+
+bool AD_GetCfgPin(void)
+{
+  return AD_OPTO_CFG_PORT->IDR & AD_OPTO_CFG_PIN;
 }
