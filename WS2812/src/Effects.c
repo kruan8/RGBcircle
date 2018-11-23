@@ -1,28 +1,42 @@
 #include "effects.h"
+#include "timer.h"
+#include <string.h>
+
+typedef struct
+{
+  uint8_t nPwmValue;    // 4 bit-Register
+  uint8_t nFrameCtrl;   // 5 bit-Counter
+  uint8_t nNextBright;  // 4 bit-Register
+}candle_t;
 
 uint32_t g_nLeds;
 
+// jeste prohlednout:
+// https://github.com/adafruit/Adafruit_NeoPixel/blob/master/examples/RGBWstrandtest/RGBWstrandtest.ino
+
+
 void Eff_EffectsLoop()
 {
+  g_nLeds = RGBlib_GetLedsCount();
+
   while (1)
   {
     RGBlib_IsDark();
   }
 
 //  {
-//    // uspat, jednou za sekundu kontrolovat
+//    // pri svetle uspat, jednou za sekundu kontrolovat
 //    return;
 //  }
 
-  g_nLeds = RGBlib_GetLedsCount();
 
-//  while (1)
-//  {
-//
-////    Eff_Tears2(c_red);
-////    Eff_Tears();
-//
-//  }
+  while (1)
+  {
+      Eff_Candle(c_blue, 10000);
+//    Eff_Tears2(c_red);
+//    Eff_Tears();
+
+  }
 
   uint32_t rnd = RGBlib_Rand(1, 16);
   switch (rnd)
@@ -41,7 +55,7 @@ void Eff_EffectsLoop()
     case 12: Eff_TheaterChaseTwoColorRotate(c_red, c_blue, 7000); break;
     case 13: Eff_RainbowCycle(5, 10); break;
     case 14: Eff_Detonate(RGBlib_GetRandomColor(), 600); break;
-    case 15: break;
+    case 15: Eff_Candle(RGBlib_GetRandomColor(), 10000);
     case 16: break;
     default: break;
   }
@@ -192,7 +206,6 @@ void Eff_TheaterChaseTwoColors(RGB_colors_e eColor1, RGB_colors_e eColor2, uint8
     RGBlib_Delay_ms(nWait_ms);
   }
 
-
 }
 
 // skupiny 5led/2barvy, nejdrive stoji, pak rotuji v obou smerech
@@ -312,6 +325,26 @@ void Eff_Fade(RGB_colors_e color)
 }
 
 // --------------------- DETONATE --------------------------------------------------
+/*
+void pulseWhite(uint8_t wait) {
+  for(int j = 0; j < 256 ; j++){
+      for(uint16_t i=0; i<strip.numPixels(); i++) {
+          strip.setPixelColor(i, strip.Color(0,0,0, neopix_gamma[j] ) );
+        }
+        delay(wait);
+        strip.show();
+      }
+
+  for(int j = 255; j >= 0 ; j--){
+      for(uint16_t i=0; i<strip.numPixels(); i++) {
+          strip.setPixelColor(i, strip.Color(0,0,0, neopix_gamma[j] ) );
+        }
+        delay(wait);
+        strip.show();
+      }
+}*/
+
+
 void Eff_Detonate(RGB_colors_e color, uint16_t nStartDelay_ms)
 {
   while (nStartDelay_ms)
@@ -424,65 +457,78 @@ void Eff_SpeedRotateLed()
     RGBlib_Delay_ms(2000);
 }
 
-void Eff_Candle(RGB_colors_e color)
+void Eff_Candle(RGB_colors_e eColor, uint32_t nDuration_ms)
 {
-  uint8_t nPwmCtrl = 0;		// 4 bit-Counter
-  uint8_t nFrameCtrl = 0;	// 5 bit-Counter
+  candle_t arrCandle[g_nLeds];
 
-  uint8_t PWM_VAL = 0;		// 4 bit-Register
-  uint8_t NEXTBRIGHT = 0;	// 4 bit-Register
-  uint8_t RAND = 0;			  // 5 bit Signal
-  uint8_t randflag = 0;		// 1 bit Signal
+  uint8_t nLedBright;
+  uint8_t nRand = 0;        // 5 bit Signal
+  uint8_t nRandFlag = 0;    // 1 bit Signal
 
+  uint16_t nSize = sizeof(arrCandle);
+  memset (arrCandle, 0, nSize);
+
+  uint32_t nEndTime = Timer_GetTicks_ms() + nDuration_ms;
+//  while (Timer_GetTicks_ms() < nEndTime)
+
+//  for (uint32_t i = 0; i < g_nLeds; i++)
   while(1)
   {
-    //_delay_us(1e6/440/16);   // Main clock=440*16 Hz
-//    Delay_us(142);
+    // pri pouziti PWM je jeden cyklus PWM 150 us
+    // sirka PWM je 16 kroku
+    // bez PWM je cyklus 150*16=2400 us
 
  		// PWM
- 		nPwmCtrl++;
- 		nPwmCtrl &= 0xf;		// only 4 bit
-
- 		if (nPwmCtrl <= PWM_VAL)
- 		{
- 		  RGBlib_SetColorAll(color, 0);
-    }
-    else
-    {
-      RGBlib_SetColorAll(c_black, 0);
-    }
+//    arrCandle[0].nPwmCtrl++;
+//    arrCandle[0].nPwmCtrl &= 0xf;		// only 4 bit
+//
+// 		if (arrCandle[0].nPwmCtrl <= arrCandle[0].nPwmValue)
+// 		{
+// 		  RGBlib_SetLED(0, eColor);
+//    }
+//    else
+//    {
+//      RGBlib_SetLED(0, c_black);
+//    }
 
  		// FRAME
- 		if (nPwmCtrl == 0)
- 		{
- 			nFrameCtrl++;
- 			nFrameCtrl &= 0x1f;
+// 		if (arrCandle[0].nPwmCtrl == 0)
+// 		{
 
- 			if ((nFrameCtrl & 0x07) == 0)  // generate a new random number every 8 cycles. In reality this is most likely bit serial
+ 		  arrCandle[0].nFrameCtrl++;
+ 		  arrCandle[0].nFrameCtrl &= 0x1f;
+
+ 			if ((arrCandle[0].nFrameCtrl & 0x07) == 0)  // generate a new random number every 8 cycles. In reality this is most likely bit serial
  			{
- 				RAND = RGBlib_Rand(0, 31);
- 				if ((RAND & 0x0c)!=0)
+ 				nRand = RGBlib_Rand(0, 31);
+ 				if ((nRand & 0x0c) != 0)
         {
-          randflag = 1;
+          nRandFlag = 1;
         }
         else
         {
-          randflag = 0;// only update if valid
+          nRandFlag = 0;// only update if valid
         }
  			}
 
 			// NEW FRAME
- 			if (nFrameCtrl == 0)
+ 			if (arrCandle[0].nFrameCtrl == 0)
  			{
- 				PWM_VAL = NEXTBRIGHT; // reload PWM
- 				randflag = 1;		    // force update at beginning of frame
+ 			  nLedBright = arrCandle[0].nNextBright; // reload PWM
+ 				nRandFlag = 1;		    // force update at beginning of frame
  			}
 
- 			if (randflag)
+ 			if (nRandFlag)
  			{
- 				NEXTBRIGHT = RAND > 15 ? 15 : RAND;
+ 			  arrCandle[0].nNextBright = nRand > 15 ? 15 : nRand;
  			}
- 		}
+
+ 			RGBlib_SetLEDWithBrightness(0, eColor, nLedBright << 1);
+
+ 			RGBlib_Show();
+ 			TimerUs_Delay(2400);   // zkusit prodlouzit na 50 Hz = 20 ms
+
+// 		}
   }
 }
 

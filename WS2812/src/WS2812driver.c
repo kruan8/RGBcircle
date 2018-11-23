@@ -296,23 +296,3 @@ void DMA1_Channel4_5_IRQHandler(void)
 		g_bDMAInProcess = 0;
 	}
 }
-
-void SysTick_Handler(void)
-{
-  g_nTicks++;
-  if (g_nDelayTimer)
-  {
-    g_nDelayTimer--;
-  }
-}
-
-void WS2812_Delay_ms(uint32_t delay_ms)
-{
-  g_nDelayTimer = delay_ms;
-  while (g_nDelayTimer);
-}
-
-uint32_t WS2812_GetTicks(void)
-{
-  return g_nTicks;
-}

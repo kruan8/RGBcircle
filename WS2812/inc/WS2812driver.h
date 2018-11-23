@@ -24,8 +24,6 @@ void WS2812_SetBrightness(uint8_t nBrightness);
 uint8_t WS2812_GetBrightness();
 uint8_t WS2812_GetBrightnessMax();
 uint8_t WS2812_GetBrightnessValue(uint8_t nBrightness);
-void WS2812_Delay_ms(uint32_t delay_ms);
-uint32_t WS2812_GetTicks(void);
 
 
 #endif /* WS2812DRIVER_H_VER_H_ */

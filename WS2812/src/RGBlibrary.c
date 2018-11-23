@@ -8,6 +8,7 @@
 #include "RGBlibrary.h"
 #include "WS2812driver.h"
 #include "ad_driver.h"
+#include "timer.h"
 
 #define LEDS 60
 #define BUFF_SIZE (LEDS * 3)
@@ -18,6 +19,7 @@ uint8_t g_arrRGBbuff[BUFF_SIZE];
 
 void RGBlib_Init()
 {
+  Timer_Init();
 	WS2812_Init();
 	AD_Init();
 	AD_InitOpto();
@@ -36,7 +38,7 @@ void RGBlib_ColorWipe(RGB_colors_e color, uint16_t wait_ms, bool bClear)
   {
 	  RGBlib_SetLED(i, color);
 	  RGBlib_Show();
-	  WS2812_Delay_ms(wait_ms);
+	  Timer_Delay_ms(wait_ms);
   }
 }
 
@@ -50,7 +52,7 @@ void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn)
 	  RGBlib_SetColorAll(c_black, 0);
 	  RGBlib_SetLED(i, color);
 	  RGBlib_Show();
-	  WS2812_Delay_ms(wait_ms);
+	  Timer_Delay_ms(wait_ms);
   }
 
   if (bReturn)
@@ -60,7 +62,7 @@ void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn)
       RGBlib_SetColorAll(c_black, 0);
       RGBlib_SetLED(i - 1, color);
       RGBlib_Show();
-      WS2812_Delay_ms(wait_ms);
+      Timer_Delay_ms(wait_ms);
     }
   }
 
@@ -164,7 +166,7 @@ void RGBlib_SetColorAll(RGB_colors_e color, uint16_t wait_ms)
 	}
 
 	RGBlib_Show();
-	WS2812_Delay_ms(wait_ms);
+	Timer_Delay_ms(wait_ms);
 }
 
 void RGBlib_Clear(void)
@@ -234,12 +236,12 @@ RGB_colors_e RGBlib_GetRandomColor()
 
 void RGBlib_Delay_ms(uint32_t delay_ms)
 {
-  WS2812_Delay_ms(delay_ms);
+  Timer_Delay_ms(delay_ms);
 }
 
 uint32_t RGBlib_GetTicks(void)
 {
-  return WS2812_GetTicks();
+  return Timer_GetTicks_ms();
 }
 
 bool RGBlib_IsDark(void)
