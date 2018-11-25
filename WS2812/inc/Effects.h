@@ -7,7 +7,8 @@ void Eff_EffectsLoop();
 
 void Eff_Stars(RGB_colors_e color, uint32_t nDuration_ms);
 void Eff_ColorWhipe();
-void Eff_ColorWipeCenter(RGB_colors_e eColor, uint16_t nWait_ms);
+void Eff_ColorWipeCenter(RGB_colors_e eColor);
+void Eff_RotateLed(RGB_colors_e eColor);
 void Eff_TheaterChase(RGB_colors_e color, uint8_t cycles, uint8_t space, uint16_t wait_ms);
 void Eff_TheaterChaseTwoColors(RGB_colors_e eColor1, RGB_colors_e eColor2, uint8_t cycles, uint16_t nWait_ms);
 void Eff_Rainbow(uint8_t cycles, uint16_t wait_ms);

@@ -36,6 +36,7 @@ void RGBlib_Init();
 void RGBlib_ColorWipe(RGB_colors_e color, uint16_t wait_ms, bool bClear);
 void RGBlib_ColorWipeCenter(RGB_colors_e color, uint16_t wait_ms);
 void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn);
+void RGBlib_FillWithSpace(RGB_colors_e color, uint16_t nSpace, uint16_t nWait_ms);
 uint32_t RGBlib_Wheel(uint8_t nWheelPos);
 uint32_t RGBlib_Rand(uint32_t nMin, uint32_t nMax);
 

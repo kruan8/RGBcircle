@@ -43,7 +43,7 @@ void RGBlib_ColorWipe(RGB_colors_e color, uint16_t wait_ms, bool bClear)
 }
 
 
-
+//
 void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn)
 {
   RGBlib_Clear();
@@ -67,6 +67,21 @@ void RGBlib_Scanner(RGB_colors_e color, uint16_t wait_ms, bool bReturn)
   }
 
   RGBlib_SetColorAll(c_black, 0);
+}
+
+// rozsviti kazdy n-ty bod
+void RGBlib_FillWithSpace(RGB_colors_e color, uint16_t nSpace, uint16_t nWait_ms)
+{
+  for (uint16_t i = 0; i < LEDS; i++)
+  {
+    if (i % nSpace == 0)
+    {
+      RGBlib_SetLED(i, color);
+      RGBlib_Show();
+    }
+
+    RGBlib_Delay_ms(nWait_ms);
+  }
 }
 
 
@@ -255,10 +270,11 @@ bool RGBlib_IsDark(void)
 
   // rozhodovaci uroven bude 0,5V
   //
-  if (nOpto < 100)
+  if (nOpto < 80)
   {
     return true;
   }
 
   return false;
 }
+

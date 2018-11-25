@@ -19,33 +19,33 @@ void Eff_EffectsLoop()
 {
   g_nLeds = RGBlib_GetLedsCount();
 
-  while (1)
+  if (!RGBlib_IsDark())
   {
-    RGBlib_IsDark();
+    RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
+    RGBlib_Delay_ms(1000);
+    return;
+  }
+  else
+  {
+    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
   }
 
+//  while (1)
 //  {
-//    // pri svetle uspat, jednou za sekundu kontrolovat
-//    return;
+////    Eff_Candle(c_blue, 10000);
+////    Eff_Tears2(c_red);
+////    Eff_Tears();
+//
 //  }
 
-
-  while (1)
-  {
-      Eff_Candle(c_blue, 10000);
-//    Eff_Tears2(c_red);
-//    Eff_Tears();
-
-  }
-
-  uint32_t rnd = RGBlib_Rand(1, 16);
+  uint32_t rnd = RGBlib_Rand(1, 17);
   switch (rnd)
   {
     case  1: Eff_ColorWhipe(); break;
-    case  2: Eff_ColorWipeCenter(c_blue, 150); break;
-    case  3: Eff_ColorWipeCenter(c_white_dark, 120); break;
+    case  2: Eff_ColorWipeCenter(RGBlib_GetRandomColor()); break;
+    case  3: Eff_Detonate(RGBlib_GetRandomColor(), 600); break;
     case  4: Eff_Rainbow(10, 10); break;
-    case  5: Eff_SpeedRotateLed(); break;
+    case  5: break;
     case  6: Eff_TheaterChase(RGBlib_GetRandomColor(), 30, 3, 150); break;
     case  7: Eff_Stars(RGBlib_GetRandomColor(), 20000); break;
     case  8: Eff_Fade(RGBlib_GetRandomColor()); break;
@@ -53,49 +53,47 @@ void Eff_EffectsLoop()
     case 10: Eff_TheaterChaseTwoColors(c_yellow, c_blue, 15, 1000); break;
     case 11: Eff_TheaterChaseTwoColorRotate(c_yellow, c_blue, 7000); break;
     case 12: Eff_TheaterChaseTwoColorRotate(c_red, c_blue, 7000); break;
-    case 13: Eff_RainbowCycle(5, 10); break;
-    case 14: Eff_Detonate(RGBlib_GetRandomColor(), 600); break;
-    case 15: Eff_Candle(RGBlib_GetRandomColor(), 10000);
-    case 16: break;
-    default: break;
+    case 13: Eff_TheaterChaseTwoColorRotate(c_red, c_yellow, 7000); break;
+    case 14: Eff_RainbowCycle(5, 10); break;
+    case 15: /*Eff_Candle(RGBlib_GetRandomColor(), 10000);*/ break;
+    case 16: Eff_TheaterChaseRainbow(100); break;
+    case 17: Eff_RotateLed(RGBlib_GetRandomColor()); break;
+    default:  break;
   }
 
   RGBlib_Clear();
+  RGBlib_Delay_ms(1000);
 }
 
 // postupne vyplneni barvou
 void Eff_ColorWhipe()
 {
-  RGBlib_ColorWipe(c_red, 60, true);
-	RGBlib_ColorWipe(c_blue, 60, false);
-	RGBlib_ColorWipe(c_green, 60, false);
-	RGBlib_ColorWipe(c_black, 60, false);
-	RGBlib_Delay_ms(1000);
+  RGBlib_ColorWipe(c_red, 50, true);
+	RGBlib_ColorWipe(c_blue, 50, false);
+	RGBlib_ColorWipe(c_green, 50, false);
+	RGBlib_ColorWipe(c_black, 50, false);
 }
 
 // postupne vyplneni barvou ze dvou stran
-void Eff_ColorWipeCenter(RGB_colors_e eColor, uint16_t nWait_ms)
+void Eff_ColorWipeCenter(RGB_colors_e eColor)
 {
   uint8_t mid = g_nLeds / 2;
-  RGBlib_SetLED(mid, eColor);
-  for (uint16_t i = 0; i <= g_nLeds / 2; i++)
+  for (uint16_t i = 0; i <= mid; i++)
   {
     RGBlib_SetLED(mid + i, eColor);
     RGBlib_SetLED(mid - i, eColor);
     RGBlib_Show();
-    RGBlib_Delay_ms(nWait_ms);
+    RGBlib_Delay_ms(100);
   }
 
-  RGBlib_SetLED(mid, c_black);
-  for (uint16_t i = 0; i <= g_nLeds / 2; i++)
+  for (uint16_t i = 0; i <= mid; i++)
   {
-    RGBlib_SetLED(mid + i, c_black);
-    RGBlib_SetLED(mid - i, c_black);
+    RGBlib_SetLED(i, c_black);
+    RGBlib_SetLED(g_nLeds - 1 - i, c_black);
     RGBlib_Show();
-    RGBlib_Delay_ms(nWait_ms);
+    RGBlib_Delay_ms(100);
   }
 
-  RGBlib_Delay_ms(1000);
 }
 
 void Eff_Tears2(RGB_colors_e eColor)
@@ -236,6 +234,8 @@ void Eff_TheaterChaseTwoColorRotate(RGB_colors_e color1, RGB_colors_e color2, ui
     RGBlib_RotateRight(50);
   }
 
+  RGBlib_Delay_ms(1000);
+
   nTime = RGBlib_GetTicks();
   while (nTime + nDuration_ms > RGBlib_GetTicks())
   {
@@ -248,7 +248,7 @@ void Eff_TheaterChaseTwoColorRotate(RGB_colors_e color1, RGB_colors_e color2, ui
 void Eff_TheaterChaseRainbow(uint16_t wait_ms)
 {
 
-  for (uint8_t j = 0; j < 256; j++) // cycle all 256 colors in the wheel
+  for (uint16_t j = 0; j < 256; j += 2) // cycle all 256 colors in the wheel
   {
     for (uint8_t q = 0; q < 3; q++)
     {
@@ -262,7 +262,7 @@ void Eff_TheaterChaseRainbow(uint16_t wait_ms)
 
       for (uint8_t i = 0; i < g_nLeds; i = i + 3)
       {
-        RGBlib_SetLED(i + q, 0);        //turn every third pixel off
+        RGBlib_SetLED(i + q, c_black);        //turn every third pixel off
       }
     }
   }
@@ -297,7 +297,6 @@ void Eff_RainbowCycle(uint8_t cycles, uint16_t wait_ms)
     RGBlib_Delay_ms(wait_ms);
   }
 
-  RGBlib_Clear();
 }
 
 // plynule rozsveceni a zhasnuti
@@ -321,7 +320,6 @@ void Eff_Fade(RGB_colors_e color)
 
   RGBlib_SetColorAll(c_black, 0);
   RGBlib_SetBrightness(RGBlib_GetBrightnessMax());
-  RGBlib_Delay_ms(500);
 }
 
 // --------------------- DETONATE --------------------------------------------------
@@ -366,7 +364,7 @@ void Eff_Detonate(RGB_colors_e color, uint16_t nStartDelay_ms)
     RGBlib_Delay_ms(100);
   }
 
-  RGBlib_SetColorAll(c_black, 500);
+  RGBlib_Clear();
   RGBlib_SetBrightness(RGBlib_GetBrightnessMax());
 }
 
@@ -390,7 +388,7 @@ void Eff_Stars(RGB_colors_e color, uint32_t nDuration_ms)
       uint8_t nBrightness = arrBrightness[i];
       if (nBrightness == 0)
       {
-        uint8_t nRnd = RGBlib_Rand(1, 50);
+        uint8_t nRnd = RGBlib_Rand(1, 70);
         if (nRnd == 1)
         {
           nBrightness = 1;
@@ -457,6 +455,24 @@ void Eff_SpeedRotateLed()
     RGBlib_Delay_ms(2000);
 }
 
+void Eff_RotateLed(RGB_colors_e eColor)
+{
+  const uint8_t nSpeed = 15;
+  RGBlib_Scanner(eColor, nSpeed, false);
+  RGBlib_FillWithSpace(eColor, 6, nSpeed);
+  RGBlib_Delay_ms(1000);
+  RGBlib_FillWithSpace(c_black, 1, nSpeed);
+  RGBlib_FillWithSpace(eColor, 4, nSpeed);
+  RGBlib_Delay_ms(1000);
+  RGBlib_FillWithSpace(c_black, 1, nSpeed);
+  RGBlib_FillWithSpace(eColor, 3, nSpeed);
+  RGBlib_Delay_ms(1000);
+  RGBlib_FillWithSpace(c_black, 1, nSpeed);
+  RGBlib_FillWithSpace(eColor, 2, nSpeed);
+  RGBlib_Delay_ms(1000);
+  RGBlib_FillWithSpace(c_black, 1, nSpeed);
+}
+
 void Eff_Candle(RGB_colors_e eColor, uint32_t nDuration_ms)
 {
   candle_t arrCandle[g_nLeds];
@@ -465,8 +481,7 @@ void Eff_Candle(RGB_colors_e eColor, uint32_t nDuration_ms)
   uint8_t nRand = 0;        // 5 bit Signal
   uint8_t nRandFlag = 0;    // 1 bit Signal
 
-  uint16_t nSize = sizeof(arrCandle);
-  memset (arrCandle, 0, nSize);
+  memset (arrCandle, 0, sizeof(arrCandle));
 
   uint32_t nEndTime = Timer_GetTicks_ms() + nDuration_ms;
 //  while (Timer_GetTicks_ms() < nEndTime)
@@ -526,7 +541,7 @@ void Eff_Candle(RGB_colors_e eColor, uint32_t nDuration_ms)
  			RGBlib_SetLEDWithBrightness(0, eColor, nLedBright << 1);
 
  			RGBlib_Show();
- 			TimerUs_Delay(2400);   // zkusit prodlouzit na 50 Hz = 20 ms
+ 			TimerUs_Delay(150);   // zkusit prodlouzit na 50 Hz = 20 ms
 
 // 		}
   }
@@ -641,49 +656,7 @@ void Eff_Test()
 // Changes spacing to be dynmaic based on string size
 
 
-//#define THEATER_SPACING (PIXELS/20)
-//
-//
-//void theaterChase( unsigned char r , unsigned char g, unsigned char b, unsigned char wait ) {
-//
-//  for (int j=0; j< 3 ; j++) {
-//
-//    for (int q=0; q < THEATER_SPACING ; q++) {
-//
-//      unsigned int step=0;
-//
-//      cli();
-//
-//      for (int i=0; i < PIXELS ; i++) {
-//
-//        if (step==q) {
-//
-//          sendPixel( r , g , b );
-//
-//        } else {
-//
-//          sendPixel( 0 , 0 , 0 );
-//
-//        }
-//
-//        step++;
-//
-//        if (step==THEATER_SPACING) step =0;
-//
-//      }
-//
-//      sei();
-//
-//      show();
-//      delay(wait);
-//
-//    }
-//
-//  }
-//
-//}
 
-//---------------------------------------------------------------------------------------------
 // -------------------------- RAINBOW_CYCLE ----------------------------
 // I rewrite this one from scrtach to use high resolution for the color wheel to look nicer on a *much* bigger string
 

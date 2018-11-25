@@ -26,7 +26,6 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/CMSIS/core&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/CMSIS/device&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/StdPeriph_Driver/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Utilities&quot;"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.mcpu.686645624" name="Microcontroller" superClass="com.atollic.truestudio.common_options.target.mcpu" useByScannerDiscovery="false" value="STM32F030F4" valueType="enumerated"/>
 								<option id="com.atollic.truestudio.common_options.target.instr_set.2011713257" name="Instruction set" superClass="com.atollic.truestudio.common_options.target.instr_set" useByScannerDiscovery="false" value="com.atollic.truestudio.common_options.target.instr_set.thumb2" valueType="enumerated"/>
@@ -46,7 +45,6 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/CMSIS/core&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/CMSIS/device&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/StdPeriph_Driver/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Utilities&quot;"/>
 								</option>
 								<option id="com.atollic.truestudio.gcc.symbols.defined.189571076" name="Defined symbols" superClass="com.atollic.truestudio.gcc.symbols.defined" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="STM32F0"/>

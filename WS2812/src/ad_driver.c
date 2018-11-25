@@ -8,6 +8,9 @@
 
 #include "ad_driver.h"
 
+#define HW_SYSTICK_ISR_OFF     SysTick->CTRL  &= ~SysTick_CTRL_TICKINT_Msk  // vypnout preruseni od Systick
+#define HW_SYSTICK_ISR_ON      SysTick->CTRL  |= SysTick_CTRL_TICKINT_Msk   // zapnout preruseni od Systick
+
 #define AD_OPTO_IN_PORT       GPIOA
 #define AD_OPTO_IN_PIN        GPIO_Pin_4
 #define AD_OPTO_IN_CLK        RCC_AHBPeriph_GPIOA
@@ -137,4 +140,11 @@ uint32_t AD_GetOpto_mV(void)
 bool AD_GetCfgPin(void)
 {
   return AD_OPTO_CFG_PORT->IDR & AD_OPTO_CFG_PIN;
+}
+
+void AD_SleepMode(void)
+{
+  HW_SYSTICK_ISR_OFF;
+  PWR_EnterSleepMode(PWR_SLEEPEntry_WFI);
+  HW_SYSTICK_ISR_ON;
 }
