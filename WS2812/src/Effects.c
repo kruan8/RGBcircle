@@ -11,9 +11,6 @@ typedef struct
 
 uint32_t g_nLeds;
 
-// jeste prohlednout:
-// https://github.com/adafruit/Adafruit_NeoPixel/blob/master/examples/RGBWstrandtest/RGBWstrandtest.ino
-
 
 void Eff_EffectsLoop()
 {
@@ -30,34 +27,34 @@ void Eff_EffectsLoop()
     RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
   }
 
-//  while (1)
-//  {
-////    Eff_Candle(c_blue, 10000);
-////    Eff_Tears2(c_red);
-////    Eff_Tears();
-//
-//  }
+  while (1)
+  {
+    Eff_Candle(c_blue, 10000);
+//    Eff_Tears2(c_red);
+//    Eff_Tears();
 
-  uint32_t rnd = RGBlib_Rand(1, 17);
+  }
+
+  uint32_t rnd = RGBlib_Rand(1, 13);
   switch (rnd)
   {
     case  1: Eff_ColorWhipe(); break;
     case  2: Eff_ColorWipeCenter(RGBlib_GetRandomColor()); break;
     case  3: Eff_Detonate(RGBlib_GetRandomColor(), 600); break;
     case  4: Eff_Rainbow(10, 10); break;
-    case  5: break;
+    case  5: Eff_RotateLed(RGBlib_GetRandomColor()); break;
     case  6: Eff_TheaterChase(RGBlib_GetRandomColor(), 30, 3, 150); break;
-    case  7: Eff_Stars(RGBlib_GetRandomColor(), 20000); break;
+    case  7: Eff_Stars(RGBlib_GetRandomColor(), 60000); break;
     case  8: Eff_Fade(RGBlib_GetRandomColor()); break;
-    case  9: Eff_TheaterChaseTwoColors(c_red, c_blue, 15, 1000); break;
-    case 10: Eff_TheaterChaseTwoColors(c_yellow, c_blue, 15, 1000); break;
-    case 11: Eff_TheaterChaseTwoColorRotate(c_yellow, c_blue, 7000); break;
-    case 12: Eff_TheaterChaseTwoColorRotate(c_red, c_blue, 7000); break;
-    case 13: Eff_TheaterChaseTwoColorRotate(c_red, c_yellow, 7000); break;
-    case 14: Eff_RainbowCycle(5, 10); break;
-    case 15: /*Eff_Candle(RGBlib_GetRandomColor(), 10000);*/ break;
-    case 16: Eff_TheaterChaseRainbow(100); break;
-    case 17: Eff_RotateLed(RGBlib_GetRandomColor()); break;
+    case  9: Eff_TheaterChaseRainbow(100); break;
+    case 10: Eff_RainbowCycle(5, 10); break;
+    case 11: Eff_TheaterChaseTwoColorRotate(c_yellow, c_blue); break;
+    case 12: Eff_TheaterChaseTwoColorRotate(c_red, c_blue); break;
+    case 13: Eff_TheaterChaseTwoColorRotate(c_red, c_yellow); break;
+    case 14:  break;
+    case 15:  break;
+    case 16:  break;
+    case 17:  break;
     default:  break;
   }
 
@@ -178,12 +175,15 @@ void Eff_TheaterChase(RGB_colors_e color, uint8_t cycles, uint8_t space, uint16_
   }
 }
 
-// stridani dvou barev
-void Eff_TheaterChaseTwoColors(RGB_colors_e eColor1, RGB_colors_e eColor2, uint8_t cycles, uint16_t nWait_ms)
+// skupiny 5led/2barvy, nejdrive stoji, pak rotuji v obou smerech
+void Eff_TheaterChaseTwoColorRotate(RGB_colors_e eColor1, RGB_colors_e eColor2)
 {
   const uint8_t nColorWidth = 5;
+  uint8_t nCycles = 20;
 
-  while (cycles--)
+  RGBlib_Clear();
+
+  while (nCycles--)
   {
     uint32_t i = 0;
     while (i < g_nLeds)
@@ -201,35 +201,11 @@ void Eff_TheaterChaseTwoColors(RGB_colors_e eColor1, RGB_colors_e eColor2, uint8
     eColor1 = eColor2;
     eColor2 = eColor;
     RGBlib_Show();
-    RGBlib_Delay_ms(nWait_ms);
+    RGBlib_Delay_ms(1000);
   }
-
-}
-
-// skupiny 5led/2barvy, nejdrive stoji, pak rotuji v obou smerech
-void Eff_TheaterChaseTwoColorRotate(RGB_colors_e color1, RGB_colors_e color2, uint16_t nDuration_ms)
-{
-  const uint8_t nColorWidth = 5;
-
-  RGBlib_Clear();
-
-  uint32_t i = 0;
-  while (i < g_nLeds)
-  {
-    for (uint8_t space = 0; space < nColorWidth; space++)
-    {
-      RGBlib_SetLED(i + space, color1);
-      RGBlib_SetLED(i + nColorWidth + space, color2);
-    }
-
-    i += nColorWidth * 2;
-  }
-
-  RGBlib_Show();
-  RGBlib_Delay_ms(3000);
 
   uint32_t nTime = RGBlib_GetTicks();
-  while (nTime + nDuration_ms > RGBlib_GetTicks())
+  while (nTime + 10000 > RGBlib_GetTicks())
   {
     RGBlib_RotateRight(50);
   }
@@ -237,7 +213,7 @@ void Eff_TheaterChaseTwoColorRotate(RGB_colors_e color1, RGB_colors_e color2, ui
   RGBlib_Delay_ms(1000);
 
   nTime = RGBlib_GetTicks();
-  while (nTime + nDuration_ms > RGBlib_GetTicks())
+  while (nTime + 10000 > RGBlib_GetTicks())
   {
     RGBlib_RotateLeft(50);
   }
@@ -483,6 +459,7 @@ void Eff_Candle(RGB_colors_e eColor, uint32_t nDuration_ms)
 
   memset (arrCandle, 0, sizeof(arrCandle));
 
+  uint8_t nRandCounter = 0;
   uint32_t nEndTime = Timer_GetTicks_ms() + nDuration_ms;
 //  while (Timer_GetTicks_ms() < nEndTime)
 
@@ -510,38 +487,67 @@ void Eff_Candle(RGB_colors_e eColor, uint32_t nDuration_ms)
 // 		if (arrCandle[0].nPwmCtrl == 0)
 // 		{
 
- 		  arrCandle[0].nFrameCtrl++;
- 		  arrCandle[0].nFrameCtrl &= 0x1f;
+// 		  arrCandle[0].nFrameCtrl++;
+// 		  arrCandle[0].nFrameCtrl &= 0x1f;
+//
+// 			if ((arrCandle[0].nFrameCtrl & 0x07) == 0)  // generate a new random number every 8 cycles. In reality this is most likely bit serial
+// 			{
+// 				nRand = RGBlib_Rand(0, 31);
+// 				if ((nRand & 0x0c) != 0)
+//        {
+//          nRandFlag = 1;
+//        }
+//        else
+//        {
+//          nRandFlag = 0;// only update if valid
+//        }
+// 			}
+//
+//			// NEW FRAME
+// 			if (arrCandle[0].nFrameCtrl == 0)
+// 			{
+// 			  nLedBright = arrCandle[0].nNextBright; // reload PWM
+// 				nRandFlag = 1;		    // force update at beginning of frame
+// 			}
+//
+// 			if (nRandFlag)
+// 			{
+// 			  arrCandle[0].nNextBright = nRand > 15 ? 15 : nRand;
+// 			}
 
- 			if ((arrCandle[0].nFrameCtrl & 0x07) == 0)  // generate a new random number every 8 cycles. In reality this is most likely bit serial
- 			{
- 				nRand = RGBlib_Rand(0, 31);
- 				if ((nRand & 0x0c) != 0)
+
+    // https://github.com/EternityForest/CandleFlickerSimulator/blob/master/flicker.X/main.c
+
+      uint8_t brightness, i,j;
+      const uint8_t imax = 5; //actually denotes to proportion of PWM frames to logical frames
+      const uint8_t upby = 4; //cv filter up velocity
+      const uint8_t downby = 2;//cv filter down velocity
+
+      for (i &= 0xF0; !((i&15) == imax); i++)         //ignore most of the bits so we cat use them elsewhere
+      {
+        //altpwm();
+
+        j = RGBlib_Rand(0, 31);
+        if ( nLedBright < j )
         {
-          nRandFlag = 1;
+          //this filter just works by moving towads a goal
+          nLedBright += upby;
         }
         else
         {
-          nRandFlag = 0;// only update if valid
+          if (!(nLedBright < downby))//avoid arith overflow
+          {
+            nLedBright -= downby;
+          }
         }
- 			}
+      }
 
-			// NEW FRAME
- 			if (arrCandle[0].nFrameCtrl == 0)
- 			{
- 			  nLedBright = arrCandle[0].nNextBright; // reload PWM
- 				nRandFlag = 1;		    // force update at beginning of frame
- 			}
 
- 			if (nRandFlag)
- 			{
- 			  arrCandle[0].nNextBright = nRand > 15 ? 15 : nRand;
- 			}
 
  			RGBlib_SetLEDWithBrightness(0, eColor, nLedBright << 1);
 
  			RGBlib_Show();
- 			TimerUs_Delay(150);   // zkusit prodlouzit na 50 Hz = 20 ms
+ 			Timer_Delay_ms(1);   // zkusit prodlouzit na 50 Hz = 20 ms
 
 // 		}
   }
