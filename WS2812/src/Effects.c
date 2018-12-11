@@ -449,107 +449,215 @@ void Eff_RotateLed(RGB_colors_e eColor)
   RGBlib_FillWithSpace(c_black, 1, nSpeed);
 }
 
-void Eff_Candle(RGB_colors_e eColor, uint32_t nDuration_ms)
-{
-  candle_t arrCandle[g_nLeds];
-
-  uint8_t nLedBright;
-  uint8_t nRand = 0;        // 5 bit Signal
-  uint8_t nRandFlag = 0;    // 1 bit Signal
-
-  memset (arrCandle, 0, sizeof(arrCandle));
-
-  uint8_t nRandCounter = 0;
-  uint32_t nEndTime = Timer_GetTicks_ms() + nDuration_ms;
-//  while (Timer_GetTicks_ms() < nEndTime)
-
-//  for (uint32_t i = 0; i < g_nLeds; i++)
-  while(1)
-  {
-    // pri pouziti PWM je jeden cyklus PWM 150 us
-    // sirka PWM je 16 kroku
-    // bez PWM je cyklus 150*16=2400 us
-
- 		// PWM
-//    arrCandle[0].nPwmCtrl++;
-//    arrCandle[0].nPwmCtrl &= 0xf;		// only 4 bit
 //
-// 		if (arrCandle[0].nPwmCtrl <= arrCandle[0].nPwmValue)
-// 		{
-// 		  RGBlib_SetLED(0, eColor);
-//    }
-//    else
-//    {
-//      RGBlib_SetLED(0, c_black);
-//    }
-
- 		// FRAME
-// 		if (arrCandle[0].nPwmCtrl == 0)
-// 		{
-
-// 		  arrCandle[0].nFrameCtrl++;
-// 		  arrCandle[0].nFrameCtrl &= 0x1f;
+//int16_t BrightnessValues[] = {57, 65, 91, 93, 177, 255, 75, 98, 127, 159, 220, 229, 150, 85, 255, 255}; // mögliche Ziel-Helligkeiten
 //
-// 			if ((arrCandle[0].nFrameCtrl & 0x07) == 0)  // generate a new random number every 8 cycles. In reality this is most likely bit serial
-// 			{
-// 				nRand = RGBlib_Rand(0, 31);
-// 				if ((nRand & 0x0c) != 0)
+//int16_t Slope[4]; // Slope, aktuell eingestellte Rampe
+//int16_t SlopeValues[4] = {1, 2, 4, 8}; // mögliche Rampen
+//int16_t TargetBrightness[4];    // Ziel-Helligkeit; B bewegt sich in Richting D mit Schrittweite S
+//int16_t Brightness[4];
+//
+//void NewValues(uint8_t i) // Neue Ziel-Helligkeit und Rampe festlegen
+//{
+//  uint8_t k = RGBlib_Rand(0, 255) & 0xFF;
+//  TargetBrightness[i] = BrightnessValues[k & 0x0F]; // Helligkeit regulieren
+//  if (Brightness[i] < TargetBrightness[i]) // steigende oder fallende Rampe notwendig?
+//  {
+//    Slope[i] = +SlopeValues[(k & 0x30) >> 4];
+//  }
+//  else
+//  {
+//    Slope[i] = -SlopeValues[(k & 0x30) >> 4];
+//  }
+//}
+//
+//void Eff_Candle(RGB_colors_e eColor, uint32_t nDuration_ms)
+//{
+//  candle_t arrCandle[g_nLeds];
+//
+//  uint8_t nLedBright;
+//  uint8_t nRand = 0;        // 5 bit Signal
+//  uint8_t nRandFlag = 0;    // 1 bit Signal
+//
+//  memset (arrCandle, 0, sizeof(arrCandle));
+//
+//  uint8_t nRandCounter = 0;
+//  uint32_t nEndTime = Timer_GetTicks_ms() + nDuration_ms;
+////  while (Timer_GetTicks_ms() < nEndTime)
+//
+////  NewValues(0);
+////  while(1)
+////  {
+////    uint8_t i = 0;
+////    Brightness[i] += Slope[i];
+////    if (((Slope[i] > 0) && (Brightness[i] > TargetBrightness[i])) // Ende der Rampe?
+////              || ((Slope[i] < 0) && (Brightness[i] < TargetBrightness[i])))
+////    {
+////      NewValues(i);
+////    }
+////
+////
+////    RGBlib_SetLEDWithBrightness(0, eColor, Brightness[i]);
+////    RGBlib_Show();
+////    Timer_Delay_ms(10);   // zkusit prodlouzit na 50 Hz = 20 ms
+////  }
+//
+////  for (uint32_t i = 0; i < g_nLeds; i++)
+////  while(1)
+////  {
+////     pri pouziti PWM je jeden cyklus PWM 150 us
+////     sirka PWM je 16 kroku
+////     bez PWM je cyklus 150*16=2400 us
+////
+//// 		 PWM
+////    arrCandle[0].nPwmCtrl++;
+////    arrCandle[0].nPwmCtrl &= 0xf;		// only 4 bit
+////
+//// 		if (arrCandle[0].nPwmCtrl <= arrCandle[0].nPwmValue)
+//// 		{
+//// 		  RGBlib_SetLED(0, eColor);
+////    }
+////    else
+////    {
+////      RGBlib_SetLED(0, c_black);
+////    }
+////
+//// 		 FRAME
+//// 		if (arrCandle[0].nPwmCtrl == 0)
+//// 		{
+////
+//// 		  arrCandle[0].nFrameCtrl++;
+//// 		  arrCandle[0].nFrameCtrl &= 0x1f;
+////
+//// 			if ((arrCandle[0].nFrameCtrl & 0x07) == 0)  // generate a new random number every 8 cycles. In reality this is most likely bit serial
+//// 			{
+//// 				nRand = RGBlib_Rand(0, 31);
+//// 				if ((nRand & 0x0c) != 0)
+////        {
+////          nRandFlag = 1;
+////        }
+////        else
+////        {
+////          nRandFlag = 0;// only update if valid
+////        }
+//// 			}
+////
+////			// NEW FRAME
+//// 			if (arrCandle[0].nFrameCtrl == 0)
+//// 			{
+//// 			  nLedBright = arrCandle[0].nNextBright; // reload PWM
+//// 				nRandFlag = 1;		    // force update at beginning of frame
+//// 			}
+////
+//// 			if (nRandFlag)
+//// 			{
+//// 			  arrCandle[0].nNextBright = nRand > 15 ? 15 : nRand;
+//// 			}
+////
+////
+////     https://github.com/EternityForest/CandleFlickerSimulator/blob/master/flicker.X/main.c
+////
+//  while (1)
+//  {
+//      uint8_t brightness, i,j;
+//      const uint8_t imax = 5; //actually denotes to proportion of PWM frames to logical frames
+//      const uint8_t upby = 4; //cv filter up velocity
+//      const uint8_t downby = 2;//cv filter down velocity
+//
+//      for (i &= 0xF0; !((i&15) == imax); i++)         //ignore most of the bits so we cat use them elsewhere
+//      {
+//        //altpwm();
+//
+//        j = RGBlib_Rand(0, 31);
+//        if ( nLedBright < j )
 //        {
-//          nRandFlag = 1;
+//          //this filter just works by moving towads a goal
+//          nLedBright += upby;
 //        }
 //        else
 //        {
-//          nRandFlag = 0;// only update if valid
+//          if (!(nLedBright < downby))//avoid arith overflow
+//          {
+//            nLedBright -= downby;
+//          }
 //        }
-// 			}
+//      }
 //
-//			// NEW FRAME
-// 			if (arrCandle[0].nFrameCtrl == 0)
-// 			{
-// 			  nLedBright = arrCandle[0].nNextBright; // reload PWM
-// 				nRandFlag = 1;		    // force update at beginning of frame
-// 			}
-//
-// 			if (nRandFlag)
-// 			{
-// 			  arrCandle[0].nNextBright = nRand > 15 ? 15 : nRand;
-// 			}
+//      RGBlib_SetLEDWithBrightness(0, eColor, nLedBright);
+//         RGBlib_Show();
+//         Timer_Delay_ms(10);   // zkusit prodlouzit na 50 Hz = 20 ms
+//  }
+////
+////
+////
+////
+//// 		}
+////  }
+//}
 
+void  Eff_Candle(RGB_colors_e eColor, uint32_t nDuration_ms)
+{
+  const uint8_t pole[] =
+  {
+    0x77, 0x7B, 0x7D, 0x7B, 0x78, 0xBA, 0x95, 0x53, 0x5E, 0x3E, 0x3E, 0x43, 0x52, 0x35, 0x3E, 0x75,
+    0x4B, 0x65, 0x7B, 0x52, 0x63, 0x58, 0x6B, 0x55, 0x62, 0x77, 0x72, 0x87, 0x85, 0x8C, 0x5D, 0x7A,
+    0x53, 0x5D, 0x50, 0x62, 0x55, 0x6F, 0x67, 0x58, 0x78, 0x4E, 0x55, 0x95, 0x6B, 0x6D, 0x7D, 0x73,
+    0x7D, 0x5B, 0x6B, 0x68, 0x6A, 0x6A, 0x60, 0x6B, 0x77, 0x77, 0x98, 0x7A, 0x87, 0x60, 0x5B, 0x6B,
+    0x53, 0x4A, 0x53, 0x68, 0x45, 0x3B, 0x65, 0x67, 0x9C, 0x60, 0x67, 0x53, 0x73, 0x75, 0x63, 0x8A,
+    0x7F, 0x83, 0x88, 0x80, 0x63, 0x58, 0x58, 0x6B, 0x7A, 0x78, 0x7B, 0x83, 0x8A, 0x87, 0x8A, 0x85,
+    0x83, 0x88, 0x8A, 0x8A, 0x8A, 0x8A, 0x8A, 0x8C, 0x8A, 0x8A, 0x8A, 0x8A, 0x8A, 0x88, 0x83, 0x7F,
+    0x7D, 0x7B, 0x7A, 0x78, 0x77, 0x75, 0x70, 0x70, 0x72, 0x70, 0x70, 0x4D, 0x41, 0x6D, 0x68, 0x60,
+    0x35, 0x35, 0x3D, 0x3B, 0x41, 0x45, 0x52, 0x5E, 0x41, 0x53, 0x5D, 0x60, 0x65, 0x6A, 0x50, 0x48,
+    0x4B, 0x4E, 0x35, 0x35, 0x31, 0x33, 0x33, 0x36, 0x3B, 0x40, 0x50, 0x4E, 0x52, 0x5D, 0x60, 0x53,
+    0x56, 0x4B, 0x35, 0x2D, 0x2E, 0x2E, 0x35, 0x38, 0x38, 0x39, 0x3B, 0x38, 0x31, 0x58, 0x40, 0x60,
+    0x4D, 0x50, 0x5A, 0x5D, 0x43, 0x40, 0x53, 0x58, 0x5A, 0x55, 0x4E, 0x31, 0x31, 0x2B, 0x2E, 0x33,
+    0x31, 0x36, 0x35, 0x36, 0x38, 0x39, 0x39, 0x38, 0x40, 0x4A, 0x41, 0x3B, 0x50, 0x62, 0x40, 0x36,
+    0x29, 0x2D, 0x45, 0x5E, 0x5D, 0x52, 0x3E, 0x33, 0x3B, 0x43, 0x35, 0x45, 0x38, 0x35, 0x31, 0x33,
+    0x36, 0x36, 0x39, 0x36, 0x38, 0x3B, 0x41, 0x36, 0x36, 0x30, 0x39, 0x33, 0x2B, 0x29, 0x33, 0x5A,
+    0x63, 0x56, 0x41, 0x3D, 0x50, 0x52, 0x55, 0x60, 0x65, 0x55, 0x3B, 0x30, 0x2E, 0x30, 0x3B, 0x4E,
+    0x36, 0x2E, 0x2B, 0x3B, 0x39, 0x3D, 0x4A, 0x50, 0x3D, 0x45, 0x58, 0x4E, 0x4B, 0x4E, 0x4A, 0x45,
+    0x58, 0x4B, 0x55, 0x5D, 0x5B, 0x56, 0x58, 0x5E, 0x60, 0x77, 0x5E, 0x38, 0x5A, 0x52, 0x46, 0x4B,
+    0x50, 0x4A, 0x4A, 0x35, 0x4E, 0x41, 0x2E, 0x36, 0x36, 0x38, 0x52, 0x4B, 0x46, 0x3B, 0x33, 0x40,
+    0x4E, 0x60, 0x5A, 0x50, 0x4D, 0x43, 0x4A, 0x50, 0x4B, 0x48, 0x40, 0x3D, 0x40, 0x46, 0x52, 0x5B,
+    0x62, 0x63, 0x63, 0x5B, 0x52, 0x46, 0x5B, 0x43, 0x55, 0x45, 0x26, 0x35, 0x3B, 0x5B, 0x43, 0x4D,
+    0x40, 0x56, 0x58, 0x5A, 0x5D, 0x50, 0x46, 0x45, 0x45, 0x41, 0x3B, 0x43, 0x72, 0x87, 0x90, 0x8A,
+    0x8F, 0x97, 0x9D, 0x95, 0x73, 0x65, 0x6B, 0x4D, 0x46, 0x45, 0x55, 0x55, 0x41, 0x56, 0x55, 0x55,
+    0x56, 0x5A, 0x5A, 0x5B, 0x5E, 0x56, 0x62, 0x55, 0x65, 0x58, 0x5A, 0x62, 0x68, 0x6D, 0x6D, 0x6B,
+    0x68, 0x6A, 0x6F, 0x65, 0x6D, 0x31, 0x6F, 0x55, 0x48, 0x50, 0x55, 0x67, 0x5A, 0x41, 0x55, 0x5E,
+    0x60, 0x65, 0x68, 0x68, 0x63, 0x60, 0x6A, 0x60, 0x67, 0x6A, 0x7F, 0x83, 0x8C, 0x87, 0x88, 0x92,
+    0x8D, 0x8F, 0x88, 0x8C, 0x8C, 0x85, 0x82, 0x6A, 0x4E, 0x35, 0x23, 0x11, 0x19, 0x43, 0x3B, 0x41,
+    0x67, 0x4A, 0x4A, 0x3B, 0x2E, 0x30, 0x45, 0x41, 0x4A, 0x58, 0x48, 0x70, 0x5B, 0x6D, 0x72, 0x62,
+    0x75, 0x67, 0x56, 0x5A, 0x5E, 0x55, 0x4D, 0x77, 0x53, 0x2D, 0x36, 0x41, 0x5D, 0x55, 0x40, 0x40,
+    0x40, 0x40, 0x40, 0x3E, 0x41, 0x5E, 0x82, 0x92, 0x88, 0x88, 0x90, 0x94, 0x88, 0x85, 0x7B, 0x63,
+    0x55, 0x53, 0x56, 0x55, 0x50, 0x53, 0x55, 0x03, 0x34, 0x01, 0x3A, 0x7E, 0xFF, 0x01, 0x60, 0x3E,
+    0x3E, 0x28, 0x01, 0x8E
+  };
 
-    // https://github.com/EternityForest/CandleFlickerSimulator/blob/master/flicker.X/main.c
+  uint16_t nSize = sizeof (pole);
+  uint16_t arrLedIndex[g_nLeds];
+  for (uint8_t i = 0; i < g_nLeds; i++)
+  {
+    arrLedIndex[i] = RGBlib_Rand(0, nSize - 1);
+  }
 
-      uint8_t brightness, i,j;
-      const uint8_t imax = 5; //actually denotes to proportion of PWM frames to logical frames
-      const uint8_t upby = 4; //cv filter up velocity
-      const uint8_t downby = 2;//cv filter down velocity
-
-      for (i &= 0xF0; !((i&15) == imax); i++)         //ignore most of the bits so we cat use them elsewhere
+  uint32_t nEndTime = Timer_GetTicks_ms() + nDuration_ms;
+  while (Timer_GetTicks_ms() < nEndTime)
+  {
+    for (uint8_t i = 0; i < g_nLeds; i++)
+    {
+      uint16_t nBrightness = pole[arrLedIndex[i]] + 30;
+      if (nBrightness > 255)
       {
-        //altpwm();
-
-        j = RGBlib_Rand(0, 31);
-        if ( nLedBright < j )
-        {
-          //this filter just works by moving towads a goal
-          nLedBright += upby;
-        }
-        else
-        {
-          if (!(nLedBright < downby))//avoid arith overflow
-          {
-            nLedBright -= downby;
-          }
-        }
+        nBrightness = 255;
       }
 
+      RGBlib_SetLEDWithBrightness(i, eColor, nBrightness);
+      arrLedIndex[i]++;
+      arrLedIndex[i] %= nSize;
+    }
 
-
- 			RGBlib_SetLEDWithBrightness(0, eColor, nLedBright << 1);
-
- 			RGBlib_Show();
- 			Timer_Delay_ms(1);   // zkusit prodlouzit na 50 Hz = 20 ms
-
-// 		}
+    RGBlib_Show();
+    Timer_Delay_ms(80);
   }
 }
 

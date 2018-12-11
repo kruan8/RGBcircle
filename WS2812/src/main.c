@@ -41,7 +41,7 @@ int main(void)
 	RGBlib_Init();
 
   // test svitivosti vsech barev
-	 Eff_Test();
+//	 Eff_Test();
 
 //  while (1)
 //  {
