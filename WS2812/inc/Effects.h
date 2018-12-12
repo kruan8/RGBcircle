@@ -20,7 +20,10 @@ void Eff_Tears();
 void Eff_Tears2(RGB_colors_e color);
 void Eff_SpeedRotateLed();
 
-void Eff_Candle(RGB_colors_e color, uint32_t nDuration_ms);
+void Eff_Candle_1(RGB_colors_e color, uint32_t nDuration_ms);
+void Eff_Candle_2(RGB_colors_e eColor, uint32_t nDuration_ms);
+void Eff_Candle_3(RGB_colors_e eColor, uint32_t nDuration_ms);
+void Eff_Candle_4(RGB_colors_e eColor, uint32_t nDuration_ms);
 
 void Eff_Test();
 

@@ -44,7 +44,9 @@ void RGBlib_RotateRight(uint32_t nDelay_ms);
 void RGBlib_RotateLeft(uint32_t nDelay_ms);
 
 void RGBlib_SetLED(uint8_t position, RGB_colors_e color);
+void RGBlib_SetLEDWithBrightnessGamma(uint8_t position, RGB_colors_e eColor, uint8_t nBrightness);
 void RGBlib_SetLEDWithBrightness(uint8_t position, RGB_colors_e eColor, uint8_t nBrightness);
+
 uint32_t RGBlib_GetColor(uint8_t position);
 void RGBlib_SetColorAll(RGB_colors_e color, uint16_t wait_ms);
 void RGBlib_Clear(void);
