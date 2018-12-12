@@ -22,12 +22,6 @@
  * v0.1: initial version
  *
  *
- *  ColorWhipeCenter: mazat obracene
- *  Eff_TheaterChase rozsirit ze 3mezer na 4 (ze 20 bodu na 15) ! je tam parametr
- *  nebo nahodne 3 nebo 4 nebo 5 - je tam parametr
- *
- *  po kazdem efektu vymazat a sekundu pauza
- *
  *
  */
 

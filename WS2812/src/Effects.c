@@ -505,7 +505,7 @@ void  Eff_Candle_1(RGB_colors_e eColor, uint32_t nDuration_ms)
         nBrightness = 255;
       }
 
-      RGBlib_SetLEDWithBrightnessGamma(i, eColor, nBrightness);
+      RGBlib_SetLEDWithBrightnessGamma(0, eColor, nBrightness);
 //      RGBlib_SetLEDWithBrightness(i, eColor, nBrightness);
       arrLedIndex[i]++;
       arrLedIndex[i] %= nSize;
@@ -513,40 +513,6 @@ void  Eff_Candle_1(RGB_colors_e eColor, uint32_t nDuration_ms)
 
     RGBlib_Show();
     Timer_Delay_ms(80);
-  }
-}
-
-void  Eff_Candle_2(RGB_colors_e eColor, uint32_t nDuration_ms)
-{
-  while (1)
-  {
-    uint8_t nLedBright, i,j;
-    const uint8_t imax = 5; //actually denotes to proportion of PWM frames to logical frames
-    const uint8_t upby = 4; //cv filter up velocity
-    const uint8_t downby = 2;//cv filter down velocity
-
-    for (i &= 0xF0; !((i&15) == imax); i++)         //ignore most of the bits so we cat use them elsewhere
-    {
-     //altpwm();
-
-     j = RGBlib_Rand(0, 31);
-     if ( nLedBright < j )
-     {
-       //this filter just works by moving towads a goal
-       nLedBright += upby;
-     }
-     else
-     {
-       if (!(nLedBright < downby))//avoid arith overflow
-       {
-         nLedBright -= downby;
-       }
-     }
-    }
-
-    RGBlib_SetLEDWithBrightnessGamma(0, eColor, nLedBright);
-    RGBlib_Show();
-    Timer_Delay_ms(10);   // zkusit prodlouzit na 50 Hz = 20 ms
   }
 }
 
@@ -590,10 +556,14 @@ void  Eff_Candle_3(RGB_colors_e eColor, uint32_t nDuration_ms)
     {
       arrCandle[0].nNextBright = nRand > 15 ? 15 : nRand;
     }
+
+    RGBlib_SetLEDWithBrightnessGamma(0, eColor, nLedBright * 16);
+    RGBlib_Show();
+    Timer_Delay_ms(1);
   }
 }
 
-void Eff_Candle_4(RGB_colors_e eColor, uint32_t nDuration_ms)
+void Eff_Candle_2(RGB_colors_e eColor, uint32_t nDuration_ms)
 {
   int16_t BrightnessValues[] = {57, 65, 91, 93, 177, 255, 75, 98, 127, 159, 220, 229, 150, 85, 255, 255}; // mögliche Ziel-Helligkeiten
 
@@ -601,6 +571,11 @@ void Eff_Candle_4(RGB_colors_e eColor, uint32_t nDuration_ms)
   int16_t SlopeValues[4] = {1, 2, 4, 8}; // mögliche Rampen
   int16_t TargetBrightness[4];    // Ziel-Helligkeit; B bewegt sich in Richting D mit Schrittweite S
   int16_t Brightness[4];
+
+  for (uint8_t i = 0; i < 4; i++)
+  {
+    Brightness[i] = BrightnessValues[i];
+  }
 
   while(1)
   {
@@ -622,6 +597,10 @@ void Eff_Candle_4(RGB_colors_e eColor, uint32_t nDuration_ms)
         }
       }
     }
+
+    RGBlib_SetLEDWithBrightnessGamma(0, eColor, Brightness[0]);
+    RGBlib_Show();
+    Timer_Delay_ms(5);
 
   }
 
