@@ -1,5 +1,4 @@
 #include "effects.h"
-#include "timer.h"
 #include <string.h>
 
 typedef struct
@@ -29,7 +28,7 @@ void Eff_EffectsLoop()
 
   while (1)
   {
-    Eff_Candle_1(c_blue, 10000);
+    Eff_Candle_1(c_yellow, 10000);
 //    Eff_Tears2(c_red);
 //    Eff_Tears();
 
@@ -494,8 +493,8 @@ void  Eff_Candle_1(RGB_colors_e eColor, uint32_t nDuration_ms)
     arrLedIndex[i] = RGBlib_Rand(0, nSize - 1);
   }
 
-  uint32_t nEndTime = Timer_GetTicks_ms() + nDuration_ms;
-  while (Timer_GetTicks_ms() < nEndTime)
+  uint32_t nEndTime = RGBlib_GetTicks() + nDuration_ms;
+  while (RGBlib_GetTicks() < nEndTime)
   {
     for (uint8_t i = 0; i < g_nLeds; i++)
     {
@@ -512,7 +511,7 @@ void  Eff_Candle_1(RGB_colors_e eColor, uint32_t nDuration_ms)
     }
 
     RGBlib_Show();
-    Timer_Delay_ms(80);
+    RGBlib_Delay_ms(80);
   }
 }
 
@@ -525,8 +524,8 @@ void  Eff_Candle_3(RGB_colors_e eColor, uint32_t nDuration_ms)
   candle_t arrCandle[g_nLeds];
   memset (arrCandle, 0, sizeof(arrCandle));
 
-  uint32_t nEndTime = Timer_GetTicks_ms() + nDuration_ms;
-  while (Timer_GetTicks_ms() < nEndTime)
+  uint32_t nEndTime = RGBlib_GetTicks() + nDuration_ms;
+  while (RGBlib_GetTicks() < nEndTime)
   {
     //  FRAME
     arrCandle[0].nFrameCtrl++;
@@ -559,7 +558,7 @@ void  Eff_Candle_3(RGB_colors_e eColor, uint32_t nDuration_ms)
 
     RGBlib_SetLEDWithBrightnessGamma(0, eColor, nLedBright * 16);
     RGBlib_Show();
-    Timer_Delay_ms(1);
+    RGBlib_Delay_ms(1);
   }
 }
 
@@ -600,7 +599,7 @@ void Eff_Candle_2(RGB_colors_e eColor, uint32_t nDuration_ms)
 
     RGBlib_SetLEDWithBrightnessGamma(0, eColor, Brightness[0]);
     RGBlib_Show();
-    Timer_Delay_ms(5);
+    RGBlib_Delay_ms(5);
 
   }
 
