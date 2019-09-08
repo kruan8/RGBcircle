@@ -26,13 +26,13 @@ void Eff_EffectsLoop()
     RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
   }
 
-  while (1)
-  {
-    Eff_Candle_1(c_yellow, 10000);
-//    Eff_Tears2(c_red);
-//    Eff_Tears();
-
-  }
+//  while (1)
+//  {
+//    Eff_Candle_1(c_yellow, 10000);
+////    Eff_Tears2(c_red);
+////    Eff_Tears();
+//
+//  }
 
   uint32_t rnd = RGBlib_Rand(1, 13);
   switch (rnd)
