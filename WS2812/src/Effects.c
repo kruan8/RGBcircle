@@ -18,11 +18,14 @@ void Eff_EffectsLoop()
   if (!RGBlib_IsDark())
   {
     RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
+    RCC_PLLCmd(DISABLE);
     RGBlib_Delay_ms(1000);
     return;
   }
   else
   {
+    RCC_PLLCmd(ENABLE);
+    while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET);
     RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
   }
 
@@ -34,7 +37,7 @@ void Eff_EffectsLoop()
 //
 //  }
 
-  uint32_t rnd = RGBlib_Rand(1, 13);
+  uint32_t rnd = RGBlib_Rand(1, 15);
   switch (rnd)
   {
     case  1: Eff_ColorWhipe(); break;
@@ -50,8 +53,8 @@ void Eff_EffectsLoop()
     case 11: Eff_TheaterChaseTwoColorRotate(c_yellow, c_blue); break;
     case 12: Eff_TheaterChaseTwoColorRotate(c_red, c_blue); break;
     case 13: Eff_TheaterChaseTwoColorRotate(c_red, c_yellow); break;
-    case 14:  break;
-    case 15:  break;
+    case 14: Eff_FillRandom(RGBlib_GetRandomColor(), 10); Eff_FillRandom(c_black, 10);break;
+    case 15: Eff_Candle_2(RGBlib_GetRandomColor(), 30000); break;
     case 16:  break;
     case 17:  break;
     default:  break;
@@ -448,6 +451,32 @@ void Eff_RotateLed(RGB_colors_e eColor)
   RGBlib_FillWithSpace(c_black, 1, nSpeed);
 }
 
+void Eff_FillRandom (RGB_colors_e eColor, uint32_t nInterval_ms)
+{
+  RGB_colors_e arrBuff[g_nLeds];
+
+  for (uint8_t i = 0; i < g_nLeds; i++)
+  {
+    arrBuff[i] = i;
+  }
+
+  for (uint8_t i = 0; i < g_nLeds; i++)
+  {
+    uint8_t nRnd = RGBlib_Rand(0, g_nLeds - 1);
+    RGB_colors_e c = arrBuff[nRnd];
+    arrBuff[nRnd] = arrBuff[i];
+    arrBuff[i] = c;
+  }
+
+  for (uint8_t i = 0; i < g_nLeds; i++)
+  {
+    RGBlib_SetLED(arrBuff[i], eColor);
+    RGBlib_Delay_ms(nInterval_ms);
+  }
+
+  RGBlib_Delay_ms(3000);
+}
+
 void  Eff_Candle_1(RGB_colors_e eColor, uint32_t nDuration_ms)
 {
   const uint8_t pole[] =
@@ -563,6 +592,33 @@ void  Eff_Candle_3(RGB_colors_e eColor, uint32_t nDuration_ms)
 }
 
 void Eff_Candle_2(RGB_colors_e eColor, uint32_t nDuration_ms)
+{
+  //  Flicker, based on our initial RGB values
+  for(uint8_t i = 0; i < g_nLeds; i++)
+  {
+    if (RGBlib_Rand(1, 2))
+    {
+      int r = RGBlib_GetR(eColor) - RGBlib_Rand(1, 40);
+      int g = RGBlib_GetG(eColor) - RGBlib_Rand(1, 30);
+      int b = RGBlib_GetB(eColor) - RGBlib_Rand(1 ,10);
+
+      // remove negative values
+      g = MAX(g, 0);
+      r = MAX(r, 0);
+      b = MAX(b, 0);
+
+      RGBlib_SetLED(i, RGBlib_GetColorFromRGB(r, g, b));
+    }
+  }
+
+  RGBlib_Show();
+
+  //  Adjust the delay here, if you'd like.  Right now, it randomizes the
+  //  color switch delay to give a sense of realism
+  RGBlib_Delay_ms(RGBlib_Rand(50, 100));
+}
+
+void Eff_Candle_2x(RGB_colors_e eColor, uint32_t nDuration_ms)
 {
   int16_t BrightnessValues[] = {57, 65, 91, 93, 177, 255, 75, 98, 127, 159, 220, 229, 150, 85, 255, 255}; // mögliche Ziel-Helligkeiten
 

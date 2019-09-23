@@ -214,6 +214,21 @@ uint32_t RGBlib_GetColorFromRGB(uint8_t r, uint8_t g, uint8_t b)
 	return (r << 16) + (g << 8) + b;
 }
 
+uint8_t RGBlib_GetR(uint32_t nColor)
+{
+  return nColor >> 16;
+}
+
+uint8_t RGBlib_GetG(uint32_t nColor)
+{
+  return nColor >> 8;
+}
+
+uint8_t RGBlib_GetB(uint32_t nColor)
+{
+  return nColor & 0xFF;
+}
+
 void RGBlib_Show()
 {
 	WS2812_Send(g_arrRGBbuff, sizeof(g_arrRGBbuff));

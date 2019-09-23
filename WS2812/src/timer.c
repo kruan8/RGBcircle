@@ -31,7 +31,10 @@ void Timer_Init()
 void Timer_Delay_ms(uint32_t delay_ms)
 {
   nDelayTimer = delay_ms;
-  while (nDelayTimer);
+  while (nDelayTimer)
+  {
+    __WFI();
+  }
 }
 
 uint32_t Timer_GetTicks_ms()

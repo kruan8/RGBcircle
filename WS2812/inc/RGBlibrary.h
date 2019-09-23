@@ -11,6 +11,9 @@
 #include "stm32f0xx.h"
 #include <stdbool.h>
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 typedef enum
 {
   c_red        = 0xFF0000,
@@ -52,6 +55,9 @@ void RGBlib_SetColorAll(RGB_colors_e color, uint16_t wait_ms);
 void RGBlib_Clear(void);
 void RGBlib_WaitAndClear(uint16_t wait_ms);
 uint32_t RGBlib_GetColorFromRGB(uint8_t r, uint8_t g, uint8_t b);
+uint8_t RGBlib_GetR(uint32_t nColor);
+uint8_t RGBlib_GetG(uint32_t nColor);
+uint8_t RGBlib_GetB(uint32_t nColor);
 void RGBlib_SetBrightness(uint8_t nBrightness);
 uint8_t RGBlib_GetBrightness();
 uint8_t RGBlib_GetBrightnessMax();
