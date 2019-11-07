@@ -34,7 +34,6 @@ void Eff_EffectsLoop()
 //    Eff_Candle_1(c_yellow, 10000);
 ////    Eff_Tears2(c_red);
 ////    Eff_Tears();
-//
 //  }
 
   uint32_t rnd = RGBlib_Rand(1, 15);
@@ -53,11 +52,15 @@ void Eff_EffectsLoop()
     case 11: Eff_TheaterChaseTwoColorRotate(c_yellow, c_blue); break;
     case 12: Eff_TheaterChaseTwoColorRotate(c_red, c_blue); break;
     case 13: Eff_TheaterChaseTwoColorRotate(c_red, c_yellow); break;
-    case 14: Eff_FillRandom(RGBlib_GetRandomColor(), 10); Eff_FillRandom(c_black, 10);break;
-    case 15: Eff_Candle_2(RGBlib_GetRandomColor(), 30000); break;
-    case 16:  break;
-    case 17:  break;
-    default:  break;
+    case 14: Eff_FillRandom(RGBlib_GetRandomColor(), 50);
+             RGBlib_Delay_ms(1000);
+             Eff_FillRandom(c_black, 50);
+             break;
+             // Candle nefunguje - problemy s jasem
+    case 15: /* Eff_Candle_2(RGBlib_GetRandomColor(), 30000);*/ break;
+    case 16: break;
+    case 17: break;
+    default: break;
   }
 
   RGBlib_Clear();
@@ -350,8 +353,8 @@ void Eff_Detonate(RGB_colors_e color, uint16_t nStartDelay_ms)
 void Eff_Stars(RGB_colors_e color, uint32_t nDuration_ms)
 {
   uint8_t arrBrightness[g_nLeds];
-  uint8_t nMaxBrigntness = RGBlib_GetBrightnessMax();
-  const uint8_t nCutDown = 0x80;
+  uint8_t nMaxBrightness = RGBlib_GetBrightnessMax();
+  const uint8_t nCountDown = 0x80;
   uint32_t nStartTime = RGBlib_GetTicks();
 
   for (uint8_t i = 0; i < g_nLeds; i++)
@@ -375,10 +378,10 @@ void Eff_Stars(RGB_colors_e color, uint32_t nDuration_ms)
       else
       {
         // zmena jasu
-        if (nBrightness & nCutDown)
+        if (nBrightness & nCountDown)
         {
           nBrightness--;
-          if (nBrightness == nCutDown)
+          if (nBrightness == nCountDown)
           {
             nBrightness = 0;
           }
@@ -386,15 +389,15 @@ void Eff_Stars(RGB_colors_e color, uint32_t nDuration_ms)
         else
         {
           nBrightness++;
-          if (nBrightness == nMaxBrigntness)
+          if (nBrightness == nMaxBrightness)
           {
-            nBrightness |= nCutDown;
+            nBrightness |= nCountDown;
           }
         }
       }
 
       arrBrightness[i] = nBrightness;
-      RGBlib_SetLEDWithBrightnessGamma(i, color, nBrightness & ~nCutDown);
+      RGBlib_SetLEDWithBrightnessGamma(i, color, nBrightness & (~nCountDown));
     }
 
     RGBlib_Show();
@@ -471,10 +474,11 @@ void Eff_FillRandom (RGB_colors_e eColor, uint32_t nInterval_ms)
   for (uint8_t i = 0; i < g_nLeds; i++)
   {
     RGBlib_SetLED(arrBuff[i], eColor);
+    RGBlib_Show();
     RGBlib_Delay_ms(nInterval_ms);
   }
 
-  RGBlib_Delay_ms(3000);
+  RGBlib_Delay_ms(2000);
 }
 
 void  Eff_Candle_1(RGB_colors_e eColor, uint32_t nDuration_ms)

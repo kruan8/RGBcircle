@@ -156,7 +156,7 @@ void RGBlib_SetLEDWithBrightnessGamma(uint8_t position, RGB_colors_e eColor, uin
     uint8_t *pColor = (uint8_t*) &eColor;
 
     position *= 3;
-    nBrightness >>= 3;
+//    nBrightness >>= 3;
     g_arrRGBbuff[position + 2] = ((uint16_t)pColor[0] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
     g_arrRGBbuff[position + 1] = ((uint16_t)pColor[1] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
     g_arrRGBbuff[position + 0] = ((uint16_t)pColor[2] * WS2812_GetBrightnessValue(nBrightness)) >> 8;
